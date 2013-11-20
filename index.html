@@ -1,0 +1,245 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Goblocks</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+<style type="text/css">
+* { margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background-color: #444;
+}
+#grid {
+  width: 400px;
+  height: 400px;
+  border-top: solid 1px #999;
+  border-left: solid 1px #999; 
+}
+.block {
+  width: 19px;
+  height: 19px;
+  float: left;
+  border-bottom: solid 1px #999;
+  border-right: solid 1px #999;
+}
+.block[data-occupied=red] {
+  background-color: maroon;
+}
+.block[data-occupied=black] {
+  background-color: black;
+}
+</style>
+</head>
+<body>
+  <h1>Ships</h1>
+  <span onclick="beginMatch()">Begin Match</span>
+  <span onclick="stopMatch()">Stop Match</span>
+  <span>numBlack <span id="numBlack"></span></span>
+  <span>numRed <span id="numRed"></span></span>
+  <span>turn <span id="turn"></span></span>
+  <div id="grid"></div>
+  <script type="text/javascript">
+
+    var gridSize = 20;
+    var starting = 10;
+
+    var rand = function(num) {
+      return Math.floor(Math.random()*num);
+    };
+
+    var grid = document.getElementById('grid');
+    for (var i=0; i<gridSize; i++) {
+      for (var j=0; j<gridSize; j++) {
+        var block = document.createElement('div');
+        block.className = 'block';
+        block.setAttribute('data-y', i);
+        block.setAttribute('data-x', j);
+        grid.appendChild(block); 
+      }
+    } 
+
+    var setUpGrid = function(startingPositions) {
+      
+      var halfGrid = gridSize/2; 
+      var x, y;
+      for (var r=0; r<starting; r++) {
+        occupy('red', rand(halfGrid), rand(gridSize));
+      }
+
+      for (var b=0; b<starting; b++) {
+        occupy('black', halfGrid+rand(halfGrid), rand(gridSize));
+      }
+    };
+
+    var occupy = function(color, x, y) {
+      // Check if params are ok
+      //console.log(color, x, y);
+      if (color !== 'black' && color !== 'red') return;
+      // Check if space is occupied
+      //console.log(color, x, y);
+      var space = spaceAt(x, y);
+      if (space && space.occupied) return;
+      // If not occupied, set attributes
+      if (space && space.elem) {
+        space.elem.setAttribute('data-occupied', color);   
+      }
+    };
+
+    var spaceAt = function(x, y) {
+      var blocks = document.getElementsByClassName('block'); 
+      var targetBlock;
+      var b;
+      for (var i=0; i<blocks.length; i++) {
+        b = blocks[i];
+        if (b.getAttribute('data-x') == x && b.getAttribute('data-y') == y) {
+          targetBlock = b;
+        } 
+      }
+      if (targetBlock) {
+        return {
+          x: x,
+          y: y,
+          occupied: targetBlock.getAttribute('data-occupied'),
+          elem: targetBlock
+        };
+      }
+    }; 
+
+    /* Ship 1
+     */
+    var ship1tick = function() {
+      return [rand(2), rand(2)];
+    };
+
+    var ship2tick = function() {
+      return [rand(3)-1, rand(3)-1];
+    };
+
+    var ship3tick = function() {
+      var enemy = (this.color == 'black') ? 'red' : 'black';
+      var enemyToRight = false;
+      for (var j=-1; j<=1; j++) { // looks up and down
+        for (var i=1; i<6; i++) { // looks ahead to the right
+          var space = spaceAt(this.x+i, this.y+j);
+          if (space && space.occupied == enemy) {
+            enemyToRight = true;
+          }
+        }
+      }
+
+      // If there's an enemy ship in any of the 3 spaces to the right, move right, else move random
+      if (enemyToRight) {
+        //console.log('enemy to right!');
+        return [1, 0];
+      } else {
+        return [rand(3)-1, rand(3)-1];
+      }
+    };
+
+    var allShips = function() {
+      var blocks = document.querySelectorAll('.block[data-occupied]'); 
+      var ships = [];
+      for (var i=0; i<blocks.length; i++) {
+        var b = blocks[i];
+        var ship = {
+          x: parseInt(b.getAttribute('data-x')),
+          y: parseInt(b.getAttribute('data-y')),
+          occupied: b.getAttribute('data-occupied'),
+          color: b.getAttribute('data-occupied'),
+          elem: b
+        };
+        if (ship.occupied == 'red') {
+          ship.tick = ship3tick;
+        } else if (ship.occupied == 'black') {
+          ship.tick = ship1tick;
+        }
+        ships.push(ship);
+      }
+      return ships;
+    };
+
+    var remove = function(x, y) {
+      var space = spaceAt(x, y);
+      if (space && space.elem) {
+        space.elem.removeAttribute('data-occupied');
+      }
+    };
+
+    var move = function(ship, dir) {
+      // TODO: if ok,
+      var newX = ship.x+dir[0];
+      var newY = ship.y+dir[1];
+      var newSpace = spaceAt(newX, newY);
+      if (!newSpace || newSpace.occupied) return;
+      // remove current
+      remove(ship.x, ship.y);
+      // occupy next
+      occupy(ship.occupied, newX, newY);
+    };
+
+    var interval;
+    var beginMatch = function() {
+
+      var numReds = starting;
+      var numBlacks = starting;
+
+      var turn = 0;
+
+      interval = setInterval(function() {
+        turn++;
+
+        // If someone has won the game
+        if (numReds == 0) {
+          alert("Black wins!");
+        } else if (numBlacks == 0) {
+          alert("Red wins!");
+        } 
+      
+        // Tick all ships
+        var ships = allShips();
+        for (var i=0; i<ships.length; i++) {
+          var ship = ships[i];
+
+          // If this ship has no liberties, destroy it
+          var left = spaceAt(ship.x-1, ship.y);
+          var right = spaceAt(ship.x+1, ship.y);
+          var up = spaceAt(ship.x, ship.y+1);
+          var down = spaceAt(ship.x, ship.y-1);
+          if (((left && left.occupied) || !left)
+           && ((right && right.occupied) || !right)
+           && ((up && up.occupied) || !up)
+           && ((down && down.occupied) || !down)) {
+            if (ship.occupied == 'black') {
+              numBlacks--;
+            } else if (ship.occupied == 'red') {
+              numReds--;
+            }
+            remove(ship.x, ship.y);
+          }
+
+          var dir = ship.tick();
+          if (dir && dir.length == 2) {
+            move(ship, dir);
+          } 
+        }
+
+        // Update DOM
+        document.getElementById('numBlack').innerText = numBlacks;
+        document.getElementById('numRed').innerText = numReds;
+        document.getElementById('turn').innerText = turn;
+
+      }, 500);
+    }; 
+    
+    var stopMatch = function() {
+      clearInterval(interval);
+    };
+
+    // BEGIN
+    setUpGrid();
+    beginMatch();
+  </script>
+</body>
+</html>
