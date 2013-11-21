@@ -34,7 +34,11 @@ register("Vice Mark 2", function(color, text) {
       if (this.target.x < this.x) x = -1; 
       if (this.target.y > this.y) y = 1; 
       if (this.target.y < this.y) y = -1; 
-      return [x, y];
+      if (occupied(this.x+x, this.y+y)) {
+        return [0, 0];
+      } else {
+        return [x, y];
+      }
     } else {
       // Else move randomly
       return [aux.rand(3)-1, aux.rand(3)-1];

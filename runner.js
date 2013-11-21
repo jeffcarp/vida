@@ -1,5 +1,5 @@
 
-map = aux.createMap(mapSize);
+var map;
 var ships = [];
 
 var redPrototype = "Red Mark 2";
@@ -12,6 +12,8 @@ document.getElementById('blackShip').innerText = blackPrototype;
 // map[y][x]
 
 var setup = function() {
+  ships = [];
+  map = aux.createMap(mapSize);
   assignRandomStartingPositions(map, ships);
   renderMap(map, ships);
 };
@@ -90,6 +92,7 @@ var iterationRunning = false;
 var begin = function() {
   if (gameRunning) return;
   gameRunning = true;
+  iterationRunning = false;
   var interval = setInterval(function() {
     if (!gameRunning) clearInterval(interval);
     if (!iterationRunning) {
