@@ -1,216 +1,195 @@
-var gridSize = 20;
-var starting = 10;
 
-//var map = aux.createMap(gridSize);
+map = aux.createMap(mapSize);
+var ships = [];
 
-var grid = document.getElementById('grid');
-for (var i=0; i<gridSize; i++) {
-  for (var j=0; j<gridSize; j++) {
-    var block = document.createElement('div');
-    block.className = 'block';
-    block.setAttribute('data-y', i);
-    block.setAttribute('data-x', j);
-    grid.appendChild(block); 
-  }
-} 
+var redPrototype = "Red Mark 2";
+var blackPrototype = "Vice Mark 2";
 
-var setUpGrid = function(startingPositions) {
-  
-  var halfGrid = gridSize/2; 
-  var x, y;
-  for (var r=0; r<starting; r++) {
-    occupy('red', aux.rand(halfGrid), aux.rand(gridSize));
-  }
 
-  for (var b=0; b<starting; b++) {
-    occupy('black', halfGrid+aux.rand(halfGrid), aux.rand(gridSize));
+document.getElementById('redShip').innerText = redPrototype;
+document.getElementById('blackShip').innerText = blackPrototype;
+
+// map[y][x]
+
+var setup = function() {
+  assignRandomStartingPositions(map, ships);
+  renderMap(map, ships);
+};
+
+var assignRandomStartingPositions = function(map, ships) {
+  var halfGrid = mapSize/2; 
+  var x, y, space;
+  for (var i=0; i<starting; i++) {
+    var redShip = new shipModels[redPrototype]('red', i); 
+    occupy(map, redShip, aux.rand(halfGrid), aux.rand(mapSize));
+    if (redShip.x && redShip.y) ships.push(redShip);
+    var blackShip = new shipModels[blackPrototype]('black', i); 
+    occupy(map, blackShip, halfGrid+aux.rand(halfGrid), aux.rand(mapSize));
+    if (blackShip.x && blackShip.y) ships.push(blackShip);
   }
 };
 
-var occupy = function(color, x, y) {
-  // Check if params are ok
-  //console.log(color, x, y);
-  if (color !== 'black' && color !== 'red') return;
-  // Check if space is occupied
-  //console.log(color, x, y);
-  var space = spaceAt(x, y);
-  if (space && space.occupied) return;
-  // If not occupied, set attributes
-  if (space && space.elem) {
-    space.elem.setAttribute('data-occupied', color);   
-  }
-};
+/*
+ * MAP INTERACTION
+ * =============================== */
 
-var spaceAt = function(x, y) {
-  var blocks = document.getElementsByClassName('block'); 
-  var targetBlock;
-  var b;
-  for (var i=0; i<blocks.length; i++) {
-    b = blocks[i];
-    if (b.getAttribute('data-x') == x && b.getAttribute('data-y') == y) {
-      targetBlock = b;
-    } 
-  }
-  if (targetBlock) {
-    return {
-      x: x,
-      y: y,
-      occupied: targetBlock.getAttribute('data-occupied'),
-      elem: targetBlock
-    };
-  }
-}; 
-
-/* Ship 1
- */
-var ship1tick = function() {
-  return [aux.rand(2), aux.rand(2)];
-};
-
-var ship2tick = function() {
-  return [aux.rand(3)-1, aux.rand(3)-1];
-};
-
-/* 
- * Ship 3 
- */
-var ship3tick = function() {
-  var enemy = (this.color == 'black') ? 'red' : 'black';
-  var enemyToRight = false;
-  for (var j=-1; j<=1; j++) { // looks up and down
-    for (var i=1; i<6; i++) { // looks ahead to the right
-      var space = spaceAt(this.x+i, this.y+j);
-      if (space && space.occupied/* == enemy*/) {
-        enemyToRight = true;
-      }
-    }
-  }
-
-  // If there's an enemy ship in any of the 3 spaces to the right, move right, else move random
-  if (enemyToRight) {
-    //console.log('enemy to right!');
-    return [1, 0];
+var at = function(map, x, y) {
+  if (map && map[y] && map[y][x]) {
+    return map[y][x];
   } else {
-    return [aux.rand(3)-1, aux.rand(3)-1];
+    return null;
   }
 };
 
-var allShips = function() {
-  var blocks = document.querySelectorAll('.block[data-occupied]'); 
-  var ships = [];
-  for (var i=0; i<blocks.length; i++) {
-    var b = blocks[i];
-    var ship = {
-      x: parseInt(b.getAttribute('data-x')),
-      y: parseInt(b.getAttribute('data-y')),
-      occupied: b.getAttribute('data-occupied'),
-      color: b.getAttribute('data-occupied'),
-      elem: b
-    };
-    if (ship.occupied == 'red') {
-      ship.tick = ship3tick;
-    } else if (ship.occupied == 'black') {
-      ship.tick = shipModels["Red Mark 1"].tick;
-    }
-    ships.push(ship);
-  }
-  document.getElementById('redShip').innerText = "ship3tick";
-  document.getElementById('blackShip').innerText =  "Red Mark 1";
-  return ships;
+var occupied = function(map, x, y) {
+  var space = at(map, x, y);
+  return space && space.ship != null;
 };
 
-var remove = function(x, y, callback) {
-  var space = spaceAt(x, y);
-  if (space && space.elem) {
-    space.elem.removeAttribute('data-occupied');
-    if (callback) callback();
+var occupy = function(map, ship, x, y) {
+  var space = at(map, x, y);
+  if (!occupied(map, x, y) && space) {
+    space.ship = ship;
+    ship.x = x;
+    ship.y = y;
   }
 };
 
-var move = function(ship, dir) {
-  // TODO: if ok,
+var move = function(map, ship, dir) {
   var newX = ship.x+dir[0];
   var newY = ship.y+dir[1];
-  var newSpace = spaceAt(newX, newY);
-  if (!newSpace || newSpace.occupied) return;
-  // remove current
-  remove(ship.x, ship.y);
-  // occupy next
-  occupy(ship.occupied, newX, newY);
+  // Go back if ship already there
+  if (occupied(map, newX, newY)) return;
+  // Remove ship in current space
+  var space = at(map, ship.x, ship.y);
+  var newSpace = at(map, newX, newY);
+  if (space && newSpace) { 
+    space.ship = null;
+    // Occupy next
+    occupy(map, ship, newX, newY);
+  }
 };
 
-var interval;
+var destroyShip = function(ships, ship) {
+  var space = at(map, ship.x, ship.y);
+  if (space) {
+    space.ship = null;
+    var i = ships.indexOf(ship);
+    ships.splice(i, 1);
+  }
+};
+
+/*
+ * GAME RUNNING 
+ * =============================== */
+
+var gameRunning = false; 
 var turn = 0;
-var beginMatch = function() {
+var iterationRunning = false; 
 
-  var numReds = starting;
-  var numBlacks = starting;
-  var newNumReds = 0;
-  var newNumBlacks = 0;
+var begin = function() {
+  if (gameRunning) return;
+  gameRunning = true;
+  var interval = setInterval(function() {
+    if (!gameRunning) clearInterval(interval);
+    if (!iterationRunning) {
+      iterationRunning = true;
+      iterate();
+    }
+  }, 100);
+};
 
-  interval = setInterval(function() {
-    turn++;
+var pause = function() {
+  gameRunning = false;
+};
 
-    newNumReds = 0;
-    newNumBlacks = 0;
-  
-    // Tick all ships
-    var ships = allShips();
-    for (var i=0; i<ships.length; i++) {
-      var ship = ships[i];
+var iterate = function() {
+  turn++;
+  // Tick all ships
+  for (var i=0; i<ships.length; i++) {
+    var ship = ships[i];
 
-      if (ship.color == 'black') {
-        newNumBlacks++;
-      } else if (ship.color == 'red') {
-        newNumReds++;
-      }
-
-      // If this ship has no liberties, destroy it
-      var left = spaceAt(ship.x-1, ship.y);
-      var right = spaceAt(ship.x+1, ship.y);
-      var up = spaceAt(ship.x, ship.y+1);
-      var down = spaceAt(ship.x, ship.y-1);
-      if (((left && left.occupied) || !left)
-       && ((right && right.occupied) || !right)
-       && ((up && up.occupied) || !up)
-       && ((down && down.occupied) || !down)) {
-        remove(ship.x, ship.y, function() {
-          if (ship.occupied == 'black') {
-            numBlacks--;
-          } else if (ship.occupied == 'red') {
-            numReds--;
-          }
-        });
-      }
-
-      var dir = ship.tick();
-      if (dir && dir.length == 2) {
-        move(ship, dir);
-      } 
+    // See if anyone has won the game 
+    if (numberOf('black', ships) < 4) {
+      console.log('red wins!');
+      gameRunning = false;
+      return;
+    } else if (numberOf('red', ships) < 4) {
+      console.log('black wins!');
+      gameRunning = false;
+      return;
     }
 
-    // If someone has won the game
-    if (newNumReds == 0) {
-      console.log("Black wins! (?)");
-      stopMatch();
-    } else if (newNumBlacks == 0) {
-      stopMatch();
-      console.log("Red wins! (?)");
+    // If this ship has no liberties, destroy it
+    var left  = at(map, ship.x-1, ship.y);
+    var right = at(map, ship.x+1, ship.y);
+    var up    = at(map, ship.x, ship.y-1);
+    var down  = at(map, ship.x, ship.y+1);
+    if ((!left  || left.ship != null)
+     && (!right || right.ship != null)
+     && (!up    || up.ship != null)
+     && (!down  || down.ship != null)) {
+      console.log(ship.color+' '+ship.text+' down');
+      destroyShip(ships, ship);
     }
 
-    // Update DOM
-    document.getElementById('numBlack').innerText = newNumBlacks;
-    document.getElementById('numRed').innerText = newNumReds;
-    document.getElementById('turn').innerText = turn;
+    var dir = ship.tick(map, turn, ships);
+    if (dir && dir.length == 2) {
+      move(map, ship, dir);
+    } 
+  } 
 
-  }, 500);
+  document.getElementById('numBlack').innerText = numberOf('black', ships);
+  document.getElementById('numRed').innerText = numberOf('red', ships);
+  document.getElementById('turn').innerText = turn;
+
+  renderMap(map, ships);
+  iterationRunning = false; 
+};
+
+/*
+ * SHIP FETCHING 
+ * =============================== */
+
+var numberOf = function(color, ships) {
+  return ships.filter(function(s) {
+    if (s.color == color) return s;
+  }).length; 
+};
+
+/*
+ * DOM MANIPULATION
+ * =============================== */
+
+var clearMap = function(map) {
+  var blocks = document.getElementsByClassName('block');
+  for (var i=0; i<blocks.length; i++) {
+    var b = blocks[i];
+    b.removeAttribute('data-color');
+  }
+};
+
+var renderMap = function(map, ships) {
+  clearMap();
+  for (var i=0; i<ships.length; i++) {
+    var ship = ships[i];
+    var elem = blockAt(ship.x, ship.y);
+    if (elem) {
+      elem.innerText = ship.text;
+      elem.setAttribute('data-color', ship.color);
+    }
+  }
+};
+
+var blockAt = function(x, y) {
+  var blocks = document.getElementsByClassName('block');
+  for (var i in blocks) {
+    var b = blocks[i];
+    if (b.getAttribute('data-x') == x && b.getAttribute('data-y') == y) {
+      return b;
+    } 
+  }
 }; 
 
-var stopMatch = function() {
-  clearInterval(interval);
-  console.log(turn, 'turns');
-};
-
 // BEGIN
-setUpGrid();
-beginMatch();
+setup();

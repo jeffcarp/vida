@@ -1,7 +1,6 @@
-var ShipBuilder = function() {
+register(function() {
 
   var Ship = {
-    version: "0.0.1",
     name: "Red Mark 1",
     x: null,
     y: null,
@@ -13,7 +12,4 @@ var ShipBuilder = function() {
   };
 
   return Ship;
-};
-
-console.log('red mark one');
-register(ShipBuilder);
+});

@@ -20,12 +20,18 @@
       float: left;
       border-bottom: solid 1px #ddd;
       border-right: solid 1px #ddd;
+      color: white;
+      font-size: 10px;
+      text-align: center;
     }
-    .block[data-occupied=red] {
+    .block[data-color=red] {
       background-color: maroon;
     }
-    .block[data-occupied=black] {
+    .block[data-color=black] {
       background-color: black;
+    }
+    p {
+      padding: 0 0 0.4em 0.6em;
     }
     td {
       vertical-align: top;
@@ -41,8 +47,8 @@
         <div id="grid"></div>
       </td>
       <td>
-        <p onclick="beginMatch()">Begin Match</p>
-        <p onclick="stopMatch()">Stop Match</p>
+        <p onclick="begin()">Begin Match</p>
+        <p onclick="pause()">Pause Match</p>
         <p>numBlack <span id="numBlack"></span></p>
         <p>numRed <span id="numRed"></span></p>
         <p style="color:maroon;">Red running <span id="redShip"></span></p>
@@ -55,14 +61,37 @@
   <script src="helpers.js"></script> 
 
   <script>
+    // Game params
+    var map;
+    var mapSize = 16;
+    var starting = 10;
+    var blockSize = 20;
+
+    // Set up grid 
+    var grid = document.getElementById('grid');
+    var dimension = mapSize*blockSize;
+    grid.style.width = dimension+"px";
+    grid.style.height = dimension+"px";
+    for (var i=0; i<mapSize; i++) {
+      for (var j=0; j<mapSize; j++) {
+        var block = document.createElement('div');
+        block.className = 'block';
+        block.setAttribute('data-y', i);
+        block.setAttribute('data-x', j);
+        grid.appendChild(block); 
+      }
+    } 
+
+    // Open ship registry 
     var shipModels = {};
-    var register = function(shipBuilder) { 
-      var builtShip = shipBuilder(); // Build ship
-      shipModels[builtShip.name] = builtShip;
+    var register = function(name, shipType) { 
+      shipModels[name] = shipType;
     }; 
   </script>
 
-  <script src="ships/red-mark1.js"></script> 
+  <!-- Ships -->
+  <script src="ships/red-mark2.js"></script> 
+  <script src="ships/vice-mark-2.js"></script> 
 
   <script>
     console.log(shipModels);

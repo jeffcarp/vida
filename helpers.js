@@ -12,7 +12,7 @@ aux.createMap = function(size) {
       newRow.push({
         x: j, 
         y: i, 
-        occupied: false
+        ship: null 
       });
     }
     map.push(newRow);
