@@ -62,11 +62,18 @@
   <script src="helpers.js"></script> 
 
   <script>
-    // Game params
     var map;
-    var mapSize = 16;
-    var starting = 10;
-    var blockSize = 20;
+    var ships = [];
+
+    // Game params
+    var mapSize = 50;
+    var starting = 25;
+    var blockSize = 10;
+    var rotationSpeed = 30;
+    var maxTurn = mapSize*mapSize;
+
+    var redPrototype = "Vice Mark 2";
+    var blackPrototype = "Testudo 1";
 
     // Set up grid 
     var grid = document.getElementById('grid');
@@ -77,6 +84,8 @@
       for (var j=0; j<mapSize; j++) {
         var block = document.createElement('div');
         block.className = 'block';
+        block.style.width = (blockSize-1)+"px";
+        block.style.height = (blockSize-1)+"px";
         block.setAttribute('data-y', i);
         block.setAttribute('data-x', j);
         grid.appendChild(block); 
@@ -93,6 +102,9 @@
   <!-- Ships -->
   <script src="ships/red-mark2.js"></script> 
   <script src="ships/vice-mark-2.js"></script> 
+  <script src="ships/vice-mark-3.js"></script> 
+  <script src="ships/vice-mark-4.js"></script> 
+  <script src="ships/testudo-1.js"></script> 
 
   <script>
     console.log(shipModels);

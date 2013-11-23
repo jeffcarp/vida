@@ -1,10 +1,4 @@
 
-var map;
-var ships = [];
-
-var redPrototype = "Red Mark 2";
-var blackPrototype = "Vice Mark 2";
-
 
 document.getElementById('redShip').innerText = redPrototype;
 document.getElementById('blackShip').innerText = blackPrototype;
@@ -46,6 +40,11 @@ var at = function(map, x, y) {
 var occupied = function(map, x, y) {
   var space = at(map, x, y);
   return space && space.ship != null;
+};
+
+var liberty = function(map, x, y) {
+  var space = at(map, x, y);
+  return !space || space.ship == null;
 };
 
 var occupy = function(map, ship, x, y) {
@@ -99,7 +98,7 @@ var begin = function() {
       iterationRunning = true;
       iterate();
     }
-  }, 100);
+  }, rotationSpeed);
 };
 
 var pause = function() {
@@ -108,6 +107,23 @@ var pause = function() {
 
 var iterate = function() {
   turn++;
+
+  // If time has run out
+  if (turn > maxTurn) {
+    var numBlack = numberOf('black', ships);
+    var numRed = numberOf('red', ships);
+    console.log('Max number of turns reached!');
+    if (numBlack > numRed) {
+      console.log('Black wins!');
+    } else if (numRed > numBlack) {
+      console.log('Red wins!');
+    } else if (numRed == numBlack) {
+      console.log("It's a draw!");
+    }
+    gameRunning = false;
+    return;
+  }
+
   // Tick all ships
   for (var i=0; i<ships.length; i++) {
     var ship = ships[i];
