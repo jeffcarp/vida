@@ -19,3 +19,7 @@ aux.createMap = function(size) {
   }
   return map;
 };
+
+aux.write = function(id, text) {
+  document.getElementById(id).innerText = text;
+};
