@@ -1,6 +1,6 @@
 
 // Game params
-var mapSize = 200;
+var mapSize = 400;
 var startingNum = mapSize/2;
 var blockSize = 1; 
 var rotationSpeed = 50;
