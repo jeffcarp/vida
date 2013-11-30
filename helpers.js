@@ -23,3 +23,10 @@ aux.createMap = function(size) {
 aux.write = function(id, text) {
   document.getElementById(id).innerText = text;
 };
+
+aux.append = function(id, text) {
+  var elem = document.getElementById(id);
+  if (!elem) return;
+  var oldText = elem.innerHTML; 
+  elem.innerHTML = oldText+"<br />"+text;
+};

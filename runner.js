@@ -1,9 +1,9 @@
 
 // Game params
-var mapSize = 400;
+var mapSize = 20;
 var startingNum = mapSize/2;
-var blockSize = 1; 
-var rotationSpeed = 50;
+var blockSize = 10; 
+var rotationSpeed = 100;
 var maxTurn = mapSize*mapSize;
 
 var redPrototype = "Speeder 1";
@@ -65,7 +65,7 @@ var move = function(ships, ship, dir) {
 };
 
 var destroyShip = function(ships, ship) {
-  console.log(ship.color+' '+ship.text+' down');
+  aux.append('out', ship.color+' '+ship.text+' down');
   var i = ships.indexOf(ship);
   ships.splice(i, 1);
 };
@@ -102,13 +102,13 @@ var iterate = function() {
   if (turn > maxTurn) {
     var numBlack = numberOf('black', ships);
     var numRed = numberOf('red', ships);
-    console.log('Max number of turns reached!');
+    aux.append('out', 'Max number of turns reached!');
     if (numBlack > numRed) {
-      console.log('Black wins!');
+      aux.append('out', 'Black wins!');
     } else if (numRed > numBlack) {
-      console.log('Red wins!');
+      aux.append('out', 'Red wins!');
     } else if (numRed == numBlack) {
-      console.log("It's a draw!");
+      aux.append('out', "It's a draw!");
     }
     gameRunning = false;
     return;
@@ -120,11 +120,11 @@ var iterate = function() {
 
     // See if anyone has won the game 
     if (numberOf('black', ships) < 4) {
-      console.log('red wins!');
+      aux.append('out', 'red wins!');
       gameRunning = false;
       return;
     } else if (numberOf('red', ships) < 4) {
-      console.log('black wins!');
+      aux.append('out', 'black wins!');
       gameRunning = false;
       return;
     }
@@ -203,10 +203,25 @@ var svg = d3.select("#grid").append("svg")
 
 var map;
 var redrawGrid = function(data) {
+
+  var cells = svg.selectAll("rect")
+                 .data(data);
+
+  cells.enter().append("rect");
+
+  cells.attr("x", function(d) { return d.x*blockSize; })
+       .attr("y", function(d) { return d.y*blockSize; })
+       .attr("width", blockSize)
+       .attr("height", blockSize)
+       //.text(function(d) { return d.text; })
+       .style("fill", function(d) { return colorFor(d.color); });
+
+  cells.exit().remove();
+
+/*
   if (map) {
     svg.selectAll("rect")
         .data(data)
-        //.transition()
         .attr("x", function(d) { return d.x*blockSize; })
         .attr("y", function(d) { return d.y*blockSize; });
   } else {
@@ -220,6 +235,7 @@ var redrawGrid = function(data) {
         .text(function(d) { return d.text; })
         .style("fill", function(d) { return colorFor(d.color); });
   }
+*/
 };
 
 // Begin 
