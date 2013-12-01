@@ -1,83 +1,76 @@
 
+// Game params
+var mapSize = 100; 
+var startingNum = mapSize/2;
+var blockSize = 4; 
+var rotationSpeed = 50;
+var maxTurn = mapSize*mapSize;
 
-document.getElementById('redShip').innerText = redPrototype;
-document.getElementById('blackShip').innerText = blackPrototype;
+var redPrototype = "Speeder 3";
+var blackPrototype = "Speeder 3";
 
-// map[y][x]
+// Data 
+var ships = [];
+
+aux.write('redShip', redPrototype);
+aux.write('blackShip', blackPrototype);
 
 var setup = function() {
-  ships = [];
-  map = aux.createMap(mapSize);
-  assignRandomStartingPositions(map, ships);
-  renderMap(map, ships);
+  generateShips(mapSize, ships);
+  renderShips(ships);
 };
 
-var assignRandomStartingPositions = function(map, ships) {
+var generateShips = function(mapSize) {
   var halfGrid = mapSize/2; 
-  var x, y, space;
-  for (var i=0; i<starting; i++) {
-    var redShip = new shipModels[redPrototype]('red', i); 
-    occupy(map, redShip, aux.rand(halfGrid), aux.rand(mapSize));
-    if (redShip.x && redShip.y) ships.push(redShip);
-    var blackShip = new shipModels[blackPrototype]('black', i); 
-    occupy(map, blackShip, halfGrid+aux.rand(halfGrid), aux.rand(mapSize));
-    if (blackShip.x && blackShip.y) ships.push(blackShip);
+  var ship;
+  for (var i=0; i<mapSize; i++) {
+    var color = (i % 2) ? 'red' : 'black';
+    var proto = (i % 2) ? redPrototype : blackPrototype;
+    ship = new shipModels[proto](color, Math.floor(i/2));
+    ship.x = (i % 2) ? aux.rand(halfGrid) : halfGrid+aux.rand(halfGrid);
+    ship.y = (i % 2) ? aux.rand(mapSize) : aux.rand(mapSize);
+    ship.uid = i;
+    if (!occupied(ship, ship.x, ship.y)) ships.push(ship);
   }
 };
 
 /*
- * MAP INTERACTION
+ * NAVIGATION TOOLS 
  * =============================== */
 
-var at = function(map, x, y) {
-  if (map && map[y] && map[y][x]) {
-    return map[y][x];
-  } else {
-    return null;
+var occupied = function(ships, x, y) {
+  for (var i=0; i<ships.length; i++) {
+    var ship = ships[i];
+    if (ship.x === x && ship.y === y) {
+      return true; 
+    }
   }
+  return false; 
 };
 
-var occupied = function(map, x, y) {
-  var space = at(map, x, y);
-  return space && space.ship != null;
+var liberty = function(ships, x, y) {
+  return (!occupied(ships, x, y)
+       && x >= 0
+       && y >= 0
+       && x < mapSize
+       && y < mapSize);
 };
 
-var liberty = function(map, x, y) {
-  var space = at(map, x, y);
-  return !space || space.ship == null;
-};
-
-var occupy = function(map, ship, x, y) {
-  var space = at(map, x, y);
-  if (!occupied(map, x, y) && space) {
-    space.ship = ship;
-    ship.x = x;
-    ship.y = y;
-  }
-};
-
-var move = function(map, ship, dir) {
+var move = function(ships, ship, dir) {
+  if (Math.abs(dir[0]) > 1) return;
+  if (Math.abs(dir[1]) > 1) return;
   var newX = ship.x+dir[0];
   var newY = ship.y+dir[1];
-  // Go back if ship already there
-  if (occupied(map, newX, newY)) return;
-  // Remove ship in current space
-  var space = at(map, ship.x, ship.y);
-  var newSpace = at(map, newX, newY);
-  if (space && newSpace) { 
-    space.ship = null;
-    // Occupy next
-    occupy(map, ship, newX, newY);
-  }
+  if (liberty(ships, newX, newY)) {
+    ship.x = newX;
+    ship.y = newY;
+  };
 };
 
 var destroyShip = function(ships, ship) {
-  var space = at(map, ship.x, ship.y);
-  if (space) {
-    space.ship = null;
-    var i = ships.indexOf(ship);
-    ships.splice(i, 1);
-  }
+  //aux.append('out', ship.color+' '+ship.text+' down');
+  var i = ships.indexOf(ship);
+  ships.splice(i, 1);
 };
 
 /*
@@ -112,13 +105,13 @@ var iterate = function() {
   if (turn > maxTurn) {
     var numBlack = numberOf('black', ships);
     var numRed = numberOf('red', ships);
-    console.log('Max number of turns reached!');
+    aux.append('out', 'Max number of turns reached!');
     if (numBlack > numRed) {
-      console.log('Black wins!');
+      aux.append('out', 'Black wins!');
     } else if (numRed > numBlack) {
-      console.log('Red wins!');
+      aux.append('out', 'Red wins!');
     } else if (numRed == numBlack) {
-      console.log("It's a draw!");
+      aux.append('out', "It's a draw!");
     }
     gameRunning = false;
     return;
@@ -130,44 +123,70 @@ var iterate = function() {
 
     // See if anyone has won the game 
     if (numberOf('black', ships) < 4) {
-      console.log('red wins!');
+      aux.append('out', 'red wins!');
       gameRunning = false;
       return;
     } else if (numberOf('red', ships) < 4) {
-      console.log('black wins!');
+      aux.append('out', 'black wins!');
       gameRunning = false;
       return;
     }
 
     // If this ship has no liberties, destroy it
-    var left  = at(map, ship.x-1, ship.y);
-    var right = at(map, ship.x+1, ship.y);
-    var up    = at(map, ship.x, ship.y-1);
-    var down  = at(map, ship.x, ship.y+1);
-    if ((!left  || left.ship != null)
-     && (!right || right.ship != null)
-     && (!up    || up.ship != null)
-     && (!down  || down.ship != null)) {
-      console.log(ship.color+' '+ship.text+' down');
+    var left = liberty(ships, ship.x-1, ship.y);
+    var right = liberty(ships, ship.x+1, ship.y);
+    var up = liberty(ships, ship.x, ship.y-1);
+    var down = liberty(ships, ship.x, ship.y+1);
+    if (!left && !right && !up && !down) {
+      console.log(ship);
       destroyShip(ships, ship);
     }
 
-    var dir = ship.tick(map, turn, ships);
+    var dir = ship.tick(turn, ships);
     if (dir && dir.length == 2) {
-      move(map, ship, dir);
+      move(ships, ship, dir);
     } 
   } 
 
-  document.getElementById('numBlack').innerText = numberOf('black', ships);
-  document.getElementById('numRed').innerText = numberOf('red', ships);
-  document.getElementById('turn').innerText = turn;
+  aux.write('numBlack', numberOf('black', ships));
+  aux.write('numRed', numberOf('red', ships));
+  aux.write('turn', turn);
 
-  renderMap(map, ships);
+  // Experimental!
+  var redInfo = "";
+  for (var i in ships) {
+    var ship = ships[i];
+    if (ship.color != 'red') continue;
+    redInfo += "<p>";
+    redInfo += "red "+ship.text;
+//    redInfo += " (x "+ship.x+")";
+ //   redInfo += " (y "+ship.y+")";
+    if (ship.target) {
+      redInfo += " (targ "+ship.target.color+" "+ship.target.text+")";
+    }
+    redInfo += "</p>";
+  }
+  aux.html('shipinfo', redInfo);
+
+  var blackInfo = "";
+  for (var i in ships) {
+    var ship = ships[i];
+    if (ship.color != 'black') continue;
+    blackInfo += "<p>";
+    blackInfo += "black "+ship.text;
+    if (ship.target) {
+      blackInfo += " (targ "+ship.target.color+" "+ship.target.text+")";
+    }
+    blackInfo += "</p>";
+  }
+  aux.html('blackinfo', blackInfo);
+
+  renderShips(ships);
   iterationRunning = false; 
 };
 
 /*
- * SHIP FETCHING 
+ * SHIP OPERATIONS 
  * =============================== */
 
 var numberOf = function(color, ships) {
@@ -176,39 +195,81 @@ var numberOf = function(color, ships) {
   }).length; 
 };
 
+//var gridSize = 400;
+//var gridOneSide = 100;
+//var blockSize = gridSize / gridOneSide;
+
+// Set up grid 
+var grid = document.getElementById('grid');
+var dimension = mapSize*blockSize;
+grid.style.width = dimension+"px";
+grid.style.height = dimension+"px";
+
+// Takes a bunch of ships, packages them up, and
+// passes them to the SVG/DOM
+var renderShips = function(ships) {
 /*
- * DOM MANIPULATION
- * =============================== */
-
-var clearMap = function(map) {
-  var blocks = document.getElementsByClassName('block');
-  for (var i=0; i<blocks.length; i++) {
-    var b = blocks[i];
-    b.removeAttribute('data-color');
-  }
-};
-
-var renderMap = function(map, ships) {
-  clearMap();
+  var renderData = [];
   for (var i=0; i<ships.length; i++) {
     var ship = ships[i];
-    var elem = blockAt(ship.x, ship.y);
-    if (elem) {
-      elem.innerText = ship.text;
-      elem.setAttribute('data-color', ship.color);
-    }
+    renderData.push(ship);
+  }
+*/
+  redrawGrid(ships);
+};
+
+var colorFor = function(chr) {
+  if (chr == 'red') {
+    return "maroon";
+  } else if (chr == 'black') {
+    return "black";
   }
 };
 
-var blockAt = function(x, y) {
-  var blocks = document.getElementsByClassName('block');
-  for (var i in blocks) {
-    var b = blocks[i];
-    if (b.getAttribute('data-x') == x && b.getAttribute('data-y') == y) {
-      return b;
-    } 
-  }
-}; 
+var edge = mapSize*blockSize;
+var svg = d3.select("#grid").append("svg")
+  .attr("width", edge)
+  .attr("height", edge);
 
-// BEGIN
+var map;
+var redrawGrid = function(data) {
+
+  var cells = svg.selectAll("rect")
+                 .data(data);
+
+  cells.enter().append("rect");
+
+
+  cells.attr("x", function(d) { return d.x*blockSize; })
+       .attr("y", function(d) { return d.y*blockSize; })
+       .attr("width", blockSize)
+       .attr("height", blockSize)
+       //.text(function(d) { return d.text; })
+       .style("fill", function(d) { return colorFor(d.color); });
+
+  cells.exit().remove();
+
+/*
+  if (map) {
+    svg.selectAll("rect")
+        .data(data)
+        .attr("x", function(d) { return d.x*blockSize; })
+        .attr("y", function(d) { return d.y*blockSize; });
+  } else {
+    map = svg.selectAll("rect")
+        .data(data)
+        .enter().append("rect")
+        .attr("x", function(d) { return d.x*blockSize; })
+        .attr("y", function(d) { return d.y*blockSize; })
+        .attr("width", blockSize)
+        .attr("height", blockSize)
+        .text(function(d) { return d.text; })
+        .style("fill", function(d) { return colorFor(d.color); });
+  }
+*/
+};
+
+// Begin 
 setup();
+
+// Question: How do we keep tick order deterministic and fair?

@@ -11,24 +11,7 @@
     #grid {
       width: 400px;
       height: 400px;
-      border-top: solid 1px #ddd;
-      border-left: solid 1px #ddd; 
-    }
-    .block {
-      width: 19px;
-      height: 19px;
-      float: left;
-      border-bottom: solid 1px #ddd;
-      border-right: solid 1px #ddd;
-      color: white;
-      font-size: 10px;
-      text-align: center;
-    }
-    .block[data-color=red] {
-      background-color: maroon;
-    }
-    .block[data-color=black] {
-      background-color: black;
+      border: solid 1px #ddd;
     }
     p {
       padding: 0 0 0.4em 0.6em;
@@ -49,49 +32,26 @@
       <td>
         <p onclick="begin()">Begin Match</p>
         <p onclick="pause()">Pause Match</p>
-        <p onclick="setup()">Reset Match</p>
         <p>numBlack <span id="numBlack"></span></p>
         <p>numRed <span id="numRed"></span></p>
         <p style="color:maroon;">Red running <span id="redShip"></span></p>
         <p style="color:black;">Black running <span id="blackShip"></span></p>
         <p>turn <span id="turn"></span></p>
+        <p id="out"></p>
+      </td>
+      <td>
+        <div id="shipinfo"></div>
+      </td>
+      <td>
+        <div id="blackinfo"></div>
       </td>
     </tr>
   </table>
 
+  <script src="d3.v3.min.js"></script> 
   <script src="helpers.js"></script> 
 
   <script>
-    var map;
-    var ships = [];
-
-    // Game params
-    var mapSize = 50;
-    var starting = mapSize/2;
-    var blockSize = 3; 
-    var rotationSpeed = 100;
-    var maxTurn = mapSize*mapSize;
-
-    var redPrototype = "Vice Mark 2";
-    var blackPrototype = "Testudo 1";
-
-    // Set up grid 
-    var grid = document.getElementById('grid');
-    var dimension = mapSize*blockSize;
-    grid.style.width = dimension+"px";
-    grid.style.height = dimension+"px";
-    for (var i=0; i<mapSize; i++) {
-      for (var j=0; j<mapSize; j++) {
-        var block = document.createElement('div');
-        block.className = 'block';
-        block.style.width = (blockSize-1)+"px";
-        block.style.height = (blockSize-1)+"px";
-        block.setAttribute('data-y', i);
-        block.setAttribute('data-x', j);
-        grid.appendChild(block); 
-      }
-    } 
-
     // Open ship registry 
     var shipModels = {};
     var register = function(name, shipType) { 
@@ -100,15 +60,9 @@
   </script>
 
   <!-- Ships -->
-  <script src="ships/red-mark2.js"></script> 
-  <script src="ships/vice-mark-2.js"></script> 
-  <script src="ships/vice-mark-3.js"></script> 
-  <script src="ships/vice-mark-4.js"></script> 
-  <script src="ships/testudo-1.js"></script> 
-
-  <script>
-    console.log(shipModels);
-  </script>
+  <script src="ships/speeder-1.js"></script> 
+  <script src="ships/speeder-2.js"></script> 
+  <script src="ships/speeder-3.js"></script> 
 
   <script src="runner.js"></script> 
 
