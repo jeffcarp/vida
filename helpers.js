@@ -24,6 +24,10 @@ aux.write = function(id, text) {
   document.getElementById(id).innerText = text;
 };
 
+aux.html = function(id, str) {
+  document.getElementById(id).innerHTML = str;
+};
+
 aux.append = function(id, text) {
   var elem = document.getElementById(id);
   if (!elem) return;

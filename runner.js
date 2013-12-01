@@ -1,13 +1,13 @@
 
 // Game params
-var mapSize = 20;
+var mapSize = 100; 
 var startingNum = mapSize/2;
-var blockSize = 10; 
-var rotationSpeed = 100;
+var blockSize = 4; 
+var rotationSpeed = 50;
 var maxTurn = mapSize*mapSize;
 
-var redPrototype = "Speeder 1";
-var blackPrototype = "Speeder 1";
+var redPrototype = "Speeder 3";
+var blackPrototype = "Speeder 3";
 
 // Data 
 var ships = [];
@@ -29,6 +29,7 @@ var generateShips = function(mapSize) {
     ship = new shipModels[proto](color, Math.floor(i/2));
     ship.x = (i % 2) ? aux.rand(halfGrid) : halfGrid+aux.rand(halfGrid);
     ship.y = (i % 2) ? aux.rand(mapSize) : aux.rand(mapSize);
+    ship.uid = i;
     if (!occupied(ship, ship.x, ship.y)) ships.push(ship);
   }
 };
@@ -56,6 +57,8 @@ var liberty = function(ships, x, y) {
 };
 
 var move = function(ships, ship, dir) {
+  if (Math.abs(dir[0]) > 1) return;
+  if (Math.abs(dir[1]) > 1) return;
   var newX = ship.x+dir[0];
   var newY = ship.y+dir[1];
   if (liberty(ships, newX, newY)) {
@@ -65,7 +68,7 @@ var move = function(ships, ship, dir) {
 };
 
 var destroyShip = function(ships, ship) {
-  aux.append('out', ship.color+' '+ship.text+' down');
+  //aux.append('out', ship.color+' '+ship.text+' down');
   var i = ships.indexOf(ship);
   ships.splice(i, 1);
 };
@@ -130,8 +133,6 @@ var iterate = function() {
     }
 
     // If this ship has no liberties, destroy it
-    // TODO: Add this back
-
     var left = liberty(ships, ship.x-1, ship.y);
     var right = liberty(ships, ship.x+1, ship.y);
     var up = liberty(ships, ship.x, ship.y-1);
@@ -150,6 +151,35 @@ var iterate = function() {
   aux.write('numBlack', numberOf('black', ships));
   aux.write('numRed', numberOf('red', ships));
   aux.write('turn', turn);
+
+  // Experimental!
+  var redInfo = "";
+  for (var i in ships) {
+    var ship = ships[i];
+    if (ship.color != 'red') continue;
+    redInfo += "<p>";
+    redInfo += "red "+ship.text;
+//    redInfo += " (x "+ship.x+")";
+ //   redInfo += " (y "+ship.y+")";
+    if (ship.target) {
+      redInfo += " (targ "+ship.target.color+" "+ship.target.text+")";
+    }
+    redInfo += "</p>";
+  }
+  aux.html('shipinfo', redInfo);
+
+  var blackInfo = "";
+  for (var i in ships) {
+    var ship = ships[i];
+    if (ship.color != 'black') continue;
+    blackInfo += "<p>";
+    blackInfo += "black "+ship.text;
+    if (ship.target) {
+      blackInfo += " (targ "+ship.target.color+" "+ship.target.text+")";
+    }
+    blackInfo += "</p>";
+  }
+  aux.html('blackinfo', blackInfo);
 
   renderShips(ships);
   iterationRunning = false; 
@@ -208,6 +238,7 @@ var redrawGrid = function(data) {
                  .data(data);
 
   cells.enter().append("rect");
+
 
   cells.attr("x", function(d) { return d.x*blockSize; })
        .attr("y", function(d) { return d.y*blockSize; })

@@ -1,4 +1,4 @@
-register("Speeder 1", function(color, text) {
+register("Speeder 2", function(color, text) {
 
   /* Required */
   this.color = color;
@@ -14,7 +14,7 @@ register("Speeder 1", function(color, text) {
   this.tick = function(turn, ships) {
 
     var vector;
-    if (!this.target) {
+    if (!this.target || !this.targetStillExists(ships)) {
       this.target = this.findTarget(ships); 
     }
     if (this.target) {
@@ -39,7 +39,7 @@ register("Speeder 1", function(color, text) {
     if (vector) {
       return vector; 
     } else {
-      return [aux.rand(3)-1, aux.rand(3)-1];
+      return this.randomLiberty(ships);
     }
   };
 
@@ -51,6 +51,15 @@ register("Speeder 1", function(color, text) {
       }
     }
   };
+
+  this.targetStillExists = function(ships) {
+    if (!this.target) return false;
+    for (var i in ships) {
+      var ship = ships[i];
+      if (this.target.uid == ship.uid) return true; 
+    }
+    return false;
+  };   
 
   this.vectorToward = function(ships, startX, startY, endX, endY) {
       var x = 0;
@@ -64,6 +73,19 @@ register("Speeder 1", function(color, text) {
       } else {
         return [x, y];
       }
+  };
+
+  // Unused
+  this.randomLiberty = function(ships) {
+    var randLiberty = [0, 0];
+    var libs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (var i in libs) {
+      var lib = libs[i];
+      if (liberty(ships, this.x+lib[0], this.y+lib[1])) {
+        randLiberty = lib;
+      } 
+    }
+    return randLiberty;
   };
 
 });
