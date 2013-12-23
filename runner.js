@@ -1,8 +1,8 @@
 
 // Game params
-var mapSize = 500; 
-var startingNum = 3000;// mapSize/2;
-var blockSize = 1; 
+var mapSize = 200; 
+var startingNum = mapSize/2;
+var blockSize = 2; 
 var rotationSpeed = 50;
 var maxTurn = mapSize*mapSize;
 
