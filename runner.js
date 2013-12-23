@@ -1,8 +1,8 @@
 
 // Game params
-var mapSize = 100; 
-var startingNum = mapSize/2;
-var blockSize = 4; 
+var mapSize = 500; 
+var startingNum = 3000;// mapSize/2;
+var blockSize = 1; 
 var rotationSpeed = 50;
 var maxTurn = mapSize*mapSize;
 
@@ -21,9 +21,9 @@ var setup = function() {
 };
 
 var generateShips = function(mapSize) {
-  var halfGrid = mapSize/2; 
-  var ship;
-  for (var i=0; i<mapSize; i++) {
+  var halfGrid = mapSize/2,
+      ship;
+  for (var i=0; i<startingNum; i++) {
     var color = (i % 2) ? 'red' : 'black';
     var proto = (i % 2) ? redPrototype : blackPrototype;
     ship = new shipModels[proto](color, Math.floor(i/2));
