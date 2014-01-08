@@ -18,8 +18,8 @@ register("Your Ship Prototype Name", function(color, text) {
    * [0, 0] - stay put
    * [-1, 0] - go left 1
    * [1, 0] - go right 1
-   * [0, -1] - go up 1 // vertical coordinates are reversed...
-   * [0, 1] - go down 1 // think iOS GUI development
+   * [0, -1] - go up 1    // vertical coordinates are reversed...
+   * [0, 1] - go down 1   // think iOS GUI development
    */
   this.tick = function(turn, ships) {
     return [aux.rand(3)-1, aux.rand(3)-1];

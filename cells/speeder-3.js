@@ -1,6 +1,12 @@
 register("Speeder 3", function(color, text) {
 
-  /* New in Speeder 3
+  /**
+   * Speeder
+   *
+   * The Speeder AI attempts to form attack groups (currently of 4 cells)
+   * and work together in those groups to capture enemy cells.
+   *
+   * New in Speeder 3
    * findTarget, instead of just finding the enemy ship with
    * the lowest id, now attempts to get the enemy ship that
    * has the closest average distance from all friendly ships.
