@@ -1,7 +1,8 @@
 
 // Game params
-var mapSize = 200; 
-var startingNum = mapSize/2;
+var mapSize = 400; 
+//var startingNum = mapSize/2;
+var startingNum = mapSize;
 var blockSize = 2; 
 var rotationSpeed = 50;
 var maxTurn = mapSize*mapSize;
@@ -248,28 +249,8 @@ var redrawGrid = function(data) {
        .style("fill", function(d) { return colorFor(d.color); });
 
   cells.exit().remove();
-
-/*
-  if (map) {
-    svg.selectAll("rect")
-        .data(data)
-        .attr("x", function(d) { return d.x*blockSize; })
-        .attr("y", function(d) { return d.y*blockSize; });
-  } else {
-    map = svg.selectAll("rect")
-        .data(data)
-        .enter().append("rect")
-        .attr("x", function(d) { return d.x*blockSize; })
-        .attr("y", function(d) { return d.y*blockSize; })
-        .attr("width", blockSize)
-        .attr("height", blockSize)
-        .text(function(d) { return d.text; })
-        .style("fill", function(d) { return colorFor(d.color); });
-  }
-*/
 };
 
 // Begin 
 setup();
 
-// Question: How do we keep tick order deterministic and fair?

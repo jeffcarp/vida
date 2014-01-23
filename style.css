@@ -1,0 +1,22 @@
+* { margin: 0; padding: 0; }
+
+html, body { 
+  height: 100%; 
+}
+
+body {
+}
+
+#grid {
+  width: 800px;
+  height: 800px;
+  border: solid 1px #ddd;
+}
+
+p {
+  padding: 0 0 0.4em 0.6em;
+}
+
+td {
+  vertical-align: top;
+}
