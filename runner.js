@@ -1,14 +1,16 @@
 
 // Game params
-var mapSize = 400; 
-//var startingNum = mapSize/2;
-var startingNum = mapSize;
-var blockSize = 2; 
+var mapSize = 100; 
+var startingNum = mapSize/2;
+var blockSize = 8; 
 var rotationSpeed = 50;
 var maxTurn = mapSize*mapSize;
 
 var redPrototype = "Speeder 3";
 var blackPrototype = "Speeder 3";
+
+var tempNumberOfBlack = 0;
+var tempNumberOfRed = 0;
 
 // Data 
 var ships = [];
@@ -18,7 +20,7 @@ aux.write('blackShip', blackPrototype);
 
 var setup = function() {
   generateShips(mapSize, ships);
-  renderShips(ships);
+  redrawGrid(ships);
 };
 
 var generateShips = function(mapSize) {
@@ -31,7 +33,9 @@ var generateShips = function(mapSize) {
     ship.x = (i % 2) ? aux.rand(halfGrid) : halfGrid+aux.rand(halfGrid);
     ship.y = (i % 2) ? aux.rand(mapSize) : aux.rand(mapSize);
     ship.uid = i;
-    if (!occupied(ship, ship.x, ship.y)) ships.push(ship);
+    if (!occupied(ship, ship.x, ship.y)) {
+      ships.push(ship);
+    }
   }
 };
 
@@ -70,6 +74,12 @@ var move = function(ships, ship, dir) {
 
 var destroyShip = function(ships, ship) {
   //aux.append('out', ship.color+' '+ship.text+' down');
+  if (ship.color == "black") {
+    tempNumberOfBlack -= 1;
+  }
+  else {
+    tempNumberOfRed -= 1;
+  }
   var i = ships.indexOf(ship);
   ships.splice(i, 1);
 };
@@ -81,6 +91,7 @@ var destroyShip = function(ships, ship) {
 var gameRunning = false; 
 var turn = 0;
 var iterationRunning = false; 
+var prevPos = []; 
 
 var begin = function() {
   if (gameRunning) return;
@@ -101,6 +112,10 @@ var pause = function() {
 
 var iterate = function() {
   turn++;
+
+  prevPos = ships.map(function(ship) {
+    return [ship.x, ship.y, ship.color];
+  });
 
   // If time has run out
   if (turn > maxTurn) {
@@ -139,7 +154,7 @@ var iterate = function() {
     var up = liberty(ships, ship.x, ship.y-1);
     var down = liberty(ships, ship.x, ship.y+1);
     if (!left && !right && !up && !down) {
-      console.log(ship);
+      //console.log(ship);
       destroyShip(ships, ship);
     }
 
@@ -182,18 +197,34 @@ var iterate = function() {
   }
   aux.html('blackinfo', blackInfo);
 
-  renderShips(ships);
+  redrawGrid(ships, prevPos);
   iterationRunning = false; 
 };
 
 /*
  * SHIP OPERATIONS 
  * =============================== */
-
 var numberOf = function(color, ships) {
-  return ships.filter(function(s) {
+
+  if (color == "black" && tempNumberOfBlack !== 0) {
+    return tempNumberOfBlack;
+  }
+  else if (color == "red" && tempNumberOfRed !== 0) {
+    return tempNumberOfRed;
+  }
+
+  var number = ships.filter(function(s) {
     if (s.color == color) return s;
   }).length; 
+
+  if (color == "black") {
+    tempNumberOfBlack = number;
+  }
+  else if (color == "red") {
+    tempNumberOfRed = number;
+  }
+
+  return number;
 };
 
 //var gridSize = 400;
@@ -201,23 +232,13 @@ var numberOf = function(color, ships) {
 //var blockSize = gridSize / gridOneSide;
 
 // Set up grid 
-var grid = document.getElementById('grid');
-var dimension = mapSize*blockSize;
-grid.style.width = dimension+"px";
-grid.style.height = dimension+"px";
+//var grid = document.getElementById('grid');
+//var dimension = mapSize*blockSize;
+//grid.style.width = dimension+"px";
+//grid.style.height = dimension+"px";
 
 // Takes a bunch of ships, packages them up, and
 // passes them to the SVG/DOM
-var renderShips = function(ships) {
-/*
-  var renderData = [];
-  for (var i=0; i<ships.length; i++) {
-    var ship = ships[i];
-    renderData.push(ship);
-  }
-*/
-  redrawGrid(ships);
-};
 
 var colorFor = function(chr) {
   if (chr == 'red') {
@@ -228,27 +249,42 @@ var colorFor = function(chr) {
 };
 
 var edge = mapSize*blockSize;
-var svg = d3.select("#grid").append("svg")
-  .attr("width", edge)
-  .attr("height", edge);
+
+var canvas = document.getElementById("grid");
+if (canvas.getContext) {
+  var ctx = canvas.getContext("2d");
+}
+else {
+  alert("Please use a browser that supports canvas.");
+}
+var ctx = canvas.getContext('2d');
 
 var map;
-var redrawGrid = function(data) {
+var redrawGrid = function(cells, prevPos) {
+  cells = cells || [];
+  prevPos = prevPos || [];
+  // This could be refactored to just paint cells a color or white
+  if (prevPos.length) {
+    prevPos.forEach(function(coord) {
+      if (coord[2] == "black") {
+        ctx.fillStyle = "rgb(230, 230, 230)";
+      }
+      else {
+        ctx.fillStyle = "rgb(250, 230, 230)";
+      }
+      ctx.fillRect(coord[0]*blockSize, coord[1]*blockSize, blockSize, blockSize);
+    });
+  }
+  else {
+    // Clear grid
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
 
-  var cells = svg.selectAll("rect")
-                 .data(data);
-
-  cells.enter().append("rect");
-
-
-  cells.attr("x", function(d) { return d.x*blockSize; })
-       .attr("y", function(d) { return d.y*blockSize; })
-       .attr("width", blockSize)
-       .attr("height", blockSize)
-       //.text(function(d) { return d.text; })
-       .style("fill", function(d) { return colorFor(d.color); });
-
-  cells.exit().remove();
+  cells.forEach(function(cell) {
+    ctx.fillStyle = cell.color == "black" ? "black" : "maroon";
+    ctx.fillRect(cell.x*blockSize, cell.y*blockSize, blockSize, blockSize);
+    //ctx.fillRect (cell.x, cell.y, 1, 1);
+  });
 };
 
 // Begin 
