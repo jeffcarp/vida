@@ -5,11 +5,11 @@ aux.rand = function(num) {
 };
 
 aux.write = function(id, text) {
-  //document.getElementById(id).innerText = text;
+  document.getElementById(id).innerText = text;
 };
 
 aux.html = function(id, str) {
-  //document.getElementById(id).innerHTML = str;
+//  document.getElementById(id).innerHTML = str;
 };
 
 aux.append = function(id, text) {

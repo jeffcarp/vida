@@ -9,48 +9,73 @@
 </head>
 <body>
   <div id="content">
-    <h1>Vida</h1>
 
-    <div
-      style="margin:1em 0;"
-      >Vida is a simple game.
-      Each player (Red and Black) writes a basic JavaScript AI that is loaded into every 'cell' (right now each team starts with 100). 
-      The object is to capture all of your enemies' cells. Like in the game <a href="http://en.wikipedia.org/wiki/Go_(game)">Go</a>, 
-      you capture an enemy cell by surrounding it on all sides (up, down, left, right). Currently both Red and Black are running an AI
-      called <a href="https://github.com/jeffcarp/vida/blob/master/cells/speeder-3.js">Speeder 3</a>.
-      <a href="https://twitter.com/jcarp">Let me know</a> if you have any comments or suggestions</a>. The next step is probably to set up a better demo 
-      that allows you to choose from a few different AI. The code is on <a href="https://github.com/jeffcarp/vida">GitHub</a>.
-      </div>
-
-    <table>
+    <table class="arena">
       <tr>
-        <td>
-          <!-- <div id="grid"></div> -->
-          <canvas id="grid" width="800" height="800"></canvas>
-        </td>
-        <td>
-          <p onclick="begin()">Resume Match</p>
+        <td class="leftTab">
+          <section>
+            <h4>Game controls</h4>
+
+            <div 
+              onclick="begin()"
+              class="ai-badge">
+              <h3>Start Match</h3>
+            </div>
+            <div class="ai-badge">
+              <h3>Normal speed</h3>
+            </div>
+          </section>
+
+          <section>
+            <h4>Game status</h4>
+
+            <p>Turn <b id="turn"></b></p>
+          </section>
+
+          <section>
+            <h4>AIs</h4>
+
+            <div class="ai-badge">
+              <h3 id="redShip"></h3>
+              <div></div>
+            </div>
+
+            <div class="ai-badge">
+              <h3 id="blackShip"></h3>
+              <div></div>
+            </div>
+          </section>
+
+          <h4>Source code management</h4>
+
           <p onclick="pause()">Pause Match</p>
           <p onclick="iterate()">Step Once</p>
           <p onclick="window.location=''">Reset Match</p>
-          <p>numBlack <span id="numBlack"></span></p>
-          <p>numRed <span id="numRed"></span></p>
-          <p>turn <span id="turn"></span></p>
           <p id="out"></p>
 
           <div id="shipinfo"></div>
+        
+        </td>
+        <td class="centerTab">
+          <canvas id="grid" width="400" height="400"></canvas>
+        </td>
+        <td class="rightTab">
 
-          <div class="player red">
-            <h3 id="redShip">Speeder 3</h3>
-            <div>51w 7l 9t</div>
-            <h4>Jeff Carpenter</h4>
-          </div>
+          <section>
+            <h4>Distribution of pieces</h4>
 
-          <div class="player black">
-            <h3 id="blackShip">Speeder 3</h3>
-            <div>62w 1l 9t</div>
-            <h4>El Jefe</h4>
-          </div>
+            <div class="pieces-distribution">
+              <div class="red-percent" id="red-percent" style="width:50%;">
+              </div>
+            </div>
+
+            <div class="info">
+              <span class="pfr"><span id="numTotal"></span> total</span> 
+              <span class="pfr"><span id="numBlack"></span> black</span> 
+              <span class="pfr"><span id="numRed"></span> red</span> 
+            </div>
+          </section>
+
         </td>
       </tr>
     </table>

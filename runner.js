@@ -2,7 +2,7 @@
 // Game params
 var mapSize = 100; 
 var startingNum = mapSize/2;
-var blockSize = 8; 
+var blockSize = 4; 
 var rotationSpeed = 50;
 var maxTurn = mapSize*mapSize;
 
@@ -154,7 +154,6 @@ var iterate = function() {
     var up = liberty(ships, ship.x, ship.y-1);
     var down = liberty(ships, ship.x, ship.y+1);
     if (!left && !right && !up && !down) {
-      //console.log(ship);
       destroyShip(ships, ship);
     }
 
@@ -164,9 +163,15 @@ var iterate = function() {
     } 
   } 
 
-  aux.write('numBlack', numberOf('black', ships));
-  aux.write('numRed', numberOf('red', ships));
+  var numBlack = numberOf('black', ships);
+  var numRed = numberOf('red', ships);
+  var numTotal = numBlack + numRed;
+  aux.write('numBlack', numBlack);
+  aux.write('numRed', numRed);
+  aux.write('numTotal', numTotal);
   aux.write('turn', turn);
+  var redPercent = numRed / numTotal * 100; 
+  document.getElementById("red-percent").style.width = redPercent + "%";
 
   // Experimental!
   var redInfo = "";
