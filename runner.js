@@ -262,7 +262,6 @@ if (canvas.getContext) {
 else {
   alert("Please use a browser that supports canvas.");
 }
-var ctx = canvas.getContext('2d');
 
 var map;
 var redrawGrid = function(cells, prevPos) {
