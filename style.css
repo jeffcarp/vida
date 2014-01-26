@@ -3,7 +3,7 @@
   padding: 0;
 }
 
-html, body, #content {
+html, body, #app {
   height: 100%;
   width: 100%;
 }
@@ -24,7 +24,7 @@ body {
   margin-left: -200px;
 }
 
-#content {
+#app {
   margin: 0 auto;
 }
 
@@ -63,17 +63,23 @@ section {
   width: 200px;  
 }
 
-.ai-badge {
+.badge {
   margin: 0 0 1em;
   border-radius: 0.2em;
   padding: 0.5em;
   background-color: rgba(255, 255, 255, 0.1);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
-  .ai-badge:hover {
+  .badge:hover {
     cursor: pointer;
     background-color: rgba(255, 255, 255, 0.2);
   }
-  .ai-badge h3 {
+  .badge h3 {
     font-size: 1em;
   }
 
@@ -93,3 +99,7 @@ section {
     -webkit-transition: width 0.1s ease-in-out;
     transition: width 0.1s ease-in-out;
   }
+
+.pfr {
+  padding-right: 1em;
+}

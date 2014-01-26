@@ -1,4 +1,6 @@
 
+//iindow.runner = window.runner || {};
+
 // Game params
 var mapSize = 100; 
 var startingNum = mapSize/2;
@@ -92,12 +94,13 @@ var gameRunning = false;
 var turn = 0;
 var iterationRunning = false; 
 var prevPos = []; 
+var interval;
 
 var begin = function() {
   if (gameRunning) return;
   gameRunning = true;
   iterationRunning = false;
-  var interval = setInterval(function() {
+  interval = setInterval(function() {
     if (!gameRunning) clearInterval(interval);
     if (!iterationRunning) {
       iterationRunning = true;
@@ -107,11 +110,17 @@ var begin = function() {
 };
 
 var pause = function() {
+  if (interval) clearInterval(interval);
   gameRunning = false;
 };
 
-var iterate = function() {
+var advanceTurn = function() {
   turn++;
+  if (turnCallback) turnCallback(turn);
+};
+
+var iterate = function() {
+  advanceTurn();
 
   prevPos = ships.map(function(ship) {
     return [ship.x, ship.y, ship.color];
@@ -255,42 +264,45 @@ var colorFor = function(chr) {
 
 var edge = mapSize*blockSize;
 
-var canvas = document.getElementById("grid");
-if (canvas.getContext) {
-  var ctx = canvas.getContext("2d");
-}
-else {
-  alert("Please use a browser that supports canvas.");
-}
+// Begin 
+setTimeout(function() {
 
-var map;
-var redrawGrid = function(cells, prevPos) {
-  cells = cells || [];
-  prevPos = prevPos || [];
-  // This could be refactored to just paint cells a color or white
-  if (prevPos.length) {
-    prevPos.forEach(function(coord) {
-      if (coord[2] == "black") {
-        ctx.fillStyle = "rgb(230, 230, 230)";
-      }
-      else {
-        ctx.fillStyle = "rgb(250, 230, 230)";
-      }
-      ctx.fillRect(coord[0]*blockSize, coord[1]*blockSize, blockSize, blockSize);
-    });
+  window.canvas = document.getElementById("grid");
+  if (canvas.getContext) {
+    window.ctx = canvas.getContext("2d");
   }
   else {
-    // Clear grid
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    alert("Please use a browser that supports canvas.");
   }
 
-  cells.forEach(function(cell) {
-    ctx.fillStyle = cell.color == "black" ? "black" : "maroon";
-    ctx.fillRect(cell.x*blockSize, cell.y*blockSize, blockSize, blockSize);
-    //ctx.fillRect (cell.x, cell.y, 1, 1);
-  });
-};
+  var map;
+  window.redrawGrid = function(cells, prevPos) {
+    cells = cells || [];
+    prevPos = prevPos || [];
+    // This could be refactored to just paint cells a color or white
+    if (prevPos.length) {
+      prevPos.forEach(function(coord) {
+        if (coord[2] == "black") {
+          ctx.fillStyle = "rgb(230, 230, 230)";
+        }
+        else {
+          ctx.fillStyle = "rgb(250, 230, 230)";
+        }
+        ctx.fillRect(coord[0]*blockSize, coord[1]*blockSize, blockSize, blockSize);
+      });
+    }
+    else {
+      // Clear grid
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
-// Begin 
-setup();
+    cells.forEach(function(cell) {
+      ctx.fillStyle = cell.color == "black" ? "black" : "maroon";
+      ctx.fillRect(cell.x*blockSize, cell.y*blockSize, blockSize, blockSize);
+      //ctx.fillRect (cell.x, cell.y, 1, 1);
+    });
+  };
+
+  setup();
+}, 500);
 
