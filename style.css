@@ -100,6 +100,10 @@ section {
     transition: width 0.1s ease-in-out;
   }
 
+/* Parts of Fungible I can't live without */
 .pfr {
   padding-right: 1em;
+}
+.pdb {
+  padding-bottom: 0.6em;
 }

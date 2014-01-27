@@ -46,6 +46,13 @@ var LeftTab = React.createClass({
 
           <p>Turn <b>{this.props.turn}</b></p>
         </section>
+
+        <section>
+          <h4>AI</h4>
+
+          <p className="pdb">Black <b>{this.props.blackAI}</b></p>
+          <p>Red <b>{this.props.blackAI}</b></p>
+        </section>
       </td>
     );
   }
@@ -95,7 +102,9 @@ var Root = React.createClass({
     return {
       speed: "Normal",
       running: false,
-      turn: 0 
+      turn: 0,
+      blackAI: window.blackPrototype,
+      redAI: window.redPrototype
     };
   },
   toggleRunning: function() {
@@ -111,6 +120,10 @@ var Root = React.createClass({
     window.turnCallback = (function(turn) {
       this.setState({turn: turn});
     }).bind(this);
+    this.setState({
+      blackAI: window.blackPrototype,
+      redAI: window.redPrototype
+    });
   },
   changeSpeed: function() {
     console.log("changeSpeed");
@@ -137,6 +150,8 @@ var Root = React.createClass({
             speed={this.state.speed}
             turn={this.state.turn}
             running={this.state.running}
+            blackAI={this.state.blackAI} 
+            redAI={this.state.redAI} 
             changeSpeed={this.changeSpeed} 
             toggleRunning={this.toggleRunning} 
             />
