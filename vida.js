@@ -62,8 +62,21 @@ var CenterTab = React.createClass({
   render: function() {
     return (
       <td className="centerTab">
+        <MessageBar message={this.props.message} />
         <canvas id="grid" width="400" height="400"></canvas>
       </td>
+    );
+  }
+});
+
+var MessageBar = React.createClass({
+  render: function() {
+    var show = this.props.message.length > 0 ? "show": "";
+    return (
+      <div 
+      id="message-bar" 
+      className={show}
+      >{this.props.message}</div> 
     );
   }
 });
@@ -101,6 +114,7 @@ var Root = React.createClass({
   getInitialState: function() {
     return {
       speed: "Normal",
+      message: "",
       running: false,
       turn: 0,
       blackAI: window.blackPrototype,
@@ -117,16 +131,22 @@ var Root = React.createClass({
     }
   },
   componentWillMount: function() {
+
     window.turnCallback = (function(turn) {
       this.setState({turn: turn});
     }).bind(this);
+
+    window.winCallback = (function(msg) {
+      this.setState({message: msg});
+    }).bind(this);
+
     this.setState({
       blackAI: window.blackPrototype,
       redAI: window.redPrototype
     });
+
   },
   changeSpeed: function() {
-    console.log("changeSpeed");
     if (this.state.speed == "Normal") {
       window.pause();
       window.rotationSpeed = 500;
@@ -155,7 +175,9 @@ var Root = React.createClass({
             changeSpeed={this.changeSpeed} 
             toggleRunning={this.toggleRunning} 
             />
-          <CenterTab />
+          <CenterTab 
+            message={this.state.message} 
+            />
           <RightTab />
         </tr>
       </table>

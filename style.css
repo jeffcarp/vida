@@ -107,3 +107,14 @@ section {
 .pdb {
   padding-bottom: 0.6em;
 }
+
+#message-bar {
+  padding: 0.75em;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
+}
+#message-bar.show {
+  opacity: 1;
+  background-color: rgba(14, 159, 251, 0.5);
+}

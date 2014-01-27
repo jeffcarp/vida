@@ -132,11 +132,14 @@ var iterate = function() {
     var numRed = numberOf('red', ships);
     aux.append('out', 'Max number of turns reached!');
     if (numBlack > numRed) {
-      aux.append('out', 'Black wins!');
+      var msg = 'Black wins!';
+      if (winCallback) winCallback(msg);
     } else if (numRed > numBlack) {
-      aux.append('out', 'Red wins!');
+      var msg = 'Red wins!';
+      if (winCallback) winCallback(msg);
     } else if (numRed == numBlack) {
-      aux.append('out', "It's a draw!");
+      var msg = "It's a draw!";
+      if (winCallback) winCallback(msg);
     }
     gameRunning = false;
     return;
@@ -148,11 +151,13 @@ var iterate = function() {
 
     // See if anyone has won the game 
     if (numberOf('black', ships) < 4) {
-      aux.append('out', 'red wins!');
+      var msg = 'red wins!';
+      if (winCallback) winCallback(msg);
       gameRunning = false;
       return;
     } else if (numberOf('red', ships) < 4) {
-      aux.append('out', 'black wins!');
+      var msg = 'black wins!';
+      if (winCallback) winCallback(msg);
       gameRunning = false;
       return;
     }
