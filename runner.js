@@ -1,13 +1,15 @@
 
+//iindow.runner = window.runner || {};
+
 // Game params
 var mapSize = 100; 
 var startingNum = mapSize/2;
-var blockSize = 8; 
+var blockSize = 4; 
 var rotationSpeed = 50;
 var maxTurn = mapSize*mapSize;
 
-var redPrototype = "Speeder 3";
-var blackPrototype = "Speeder 3";
+window.redPrototype = "Speeder 3";
+window.blackPrototype = "Speeder 3";
 
 var tempNumberOfBlack = 0;
 var tempNumberOfRed = 0;
@@ -92,12 +94,13 @@ var gameRunning = false;
 var turn = 0;
 var iterationRunning = false; 
 var prevPos = []; 
+var interval;
 
 var begin = function() {
   if (gameRunning) return;
   gameRunning = true;
   iterationRunning = false;
-  var interval = setInterval(function() {
+  interval = setInterval(function() {
     if (!gameRunning) clearInterval(interval);
     if (!iterationRunning) {
       iterationRunning = true;
@@ -107,11 +110,17 @@ var begin = function() {
 };
 
 var pause = function() {
+  if (interval) clearInterval(interval);
   gameRunning = false;
 };
 
-var iterate = function() {
+var advanceTurn = function() {
   turn++;
+  if (turnCallback) turnCallback(turn);
+};
+
+var iterate = function() {
+  advanceTurn();
 
   prevPos = ships.map(function(ship) {
     return [ship.x, ship.y, ship.color];
@@ -123,11 +132,14 @@ var iterate = function() {
     var numRed = numberOf('red', ships);
     aux.append('out', 'Max number of turns reached!');
     if (numBlack > numRed) {
-      aux.append('out', 'Black wins!');
+      var msg = 'Black wins!';
+      if (winCallback) winCallback(msg);
     } else if (numRed > numBlack) {
-      aux.append('out', 'Red wins!');
+      var msg = 'Red wins!';
+      if (winCallback) winCallback(msg);
     } else if (numRed == numBlack) {
-      aux.append('out', "It's a draw!");
+      var msg = "It's a draw!";
+      if (winCallback) winCallback(msg);
     }
     gameRunning = false;
     return;
@@ -139,11 +151,13 @@ var iterate = function() {
 
     // See if anyone has won the game 
     if (numberOf('black', ships) < 4) {
-      aux.append('out', 'red wins!');
+      var msg = 'red wins!';
+      if (winCallback) winCallback(msg);
       gameRunning = false;
       return;
     } else if (numberOf('red', ships) < 4) {
-      aux.append('out', 'black wins!');
+      var msg = 'black wins!';
+      if (winCallback) winCallback(msg);
       gameRunning = false;
       return;
     }
@@ -154,7 +168,6 @@ var iterate = function() {
     var up = liberty(ships, ship.x, ship.y-1);
     var down = liberty(ships, ship.x, ship.y+1);
     if (!left && !right && !up && !down) {
-      //console.log(ship);
       destroyShip(ships, ship);
     }
 
@@ -164,9 +177,15 @@ var iterate = function() {
     } 
   } 
 
-  aux.write('numBlack', numberOf('black', ships));
-  aux.write('numRed', numberOf('red', ships));
+  var numBlack = numberOf('black', ships);
+  var numRed = numberOf('red', ships);
+  var numTotal = numBlack + numRed;
+  aux.write('numBlack', numBlack);
+  aux.write('numRed', numRed);
+  aux.write('numTotal', numTotal);
   aux.write('turn', turn);
+  var redPercent = numRed / numTotal * 100; 
+  document.getElementById("red-percent").style.width = redPercent + "%";
 
   // Experimental!
   var redInfo = "";
@@ -250,43 +269,45 @@ var colorFor = function(chr) {
 
 var edge = mapSize*blockSize;
 
-var canvas = document.getElementById("grid");
-if (canvas.getContext) {
-  var ctx = canvas.getContext("2d");
-}
-else {
-  alert("Please use a browser that supports canvas.");
-}
-var ctx = canvas.getContext('2d');
+// Begin 
+setTimeout(function() {
 
-var map;
-var redrawGrid = function(cells, prevPos) {
-  cells = cells || [];
-  prevPos = prevPos || [];
-  // This could be refactored to just paint cells a color or white
-  if (prevPos.length) {
-    prevPos.forEach(function(coord) {
-      if (coord[2] == "black") {
-        ctx.fillStyle = "rgb(230, 230, 230)";
-      }
-      else {
-        ctx.fillStyle = "rgb(250, 230, 230)";
-      }
-      ctx.fillRect(coord[0]*blockSize, coord[1]*blockSize, blockSize, blockSize);
-    });
+  window.canvas = document.getElementById("grid");
+  if (canvas.getContext) {
+    window.ctx = canvas.getContext("2d");
   }
   else {
-    // Clear grid
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    alert("Please use a browser that supports canvas.");
   }
 
-  cells.forEach(function(cell) {
-    ctx.fillStyle = cell.color == "black" ? "black" : "maroon";
-    ctx.fillRect(cell.x*blockSize, cell.y*blockSize, blockSize, blockSize);
-    //ctx.fillRect (cell.x, cell.y, 1, 1);
-  });
-};
+  var map;
+  window.redrawGrid = function(cells, prevPos) {
+    cells = cells || [];
+    prevPos = prevPos || [];
+    // This could be refactored to just paint cells a color or white
+    if (prevPos.length) {
+      prevPos.forEach(function(coord) {
+        if (coord[2] == "black") {
+          ctx.fillStyle = "rgb(230, 230, 230)";
+        }
+        else {
+          ctx.fillStyle = "rgb(250, 230, 230)";
+        }
+        ctx.fillRect(coord[0]*blockSize, coord[1]*blockSize, blockSize, blockSize);
+      });
+    }
+    else {
+      // Clear grid
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
-// Begin 
-setup();
+    cells.forEach(function(cell) {
+      ctx.fillStyle = cell.color == "black" ? "black" : "maroon";
+      ctx.fillRect(cell.x*blockSize, cell.y*blockSize, blockSize, blockSize);
+      //ctx.fillRect (cell.x, cell.y, 1, 1);
+    });
+  };
+
+  setup();
+}, 100);
 

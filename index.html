@@ -8,54 +8,12 @@
   <link href="style.css" rel="stylesheet" type="text/css" />
 </head>
 <body>
-  <div id="content">
-    <h1>Vida</h1>
 
-    <div
-      style="margin:1em 0;"
-      >Vida is a simple game.
-      Each player (Red and Black) writes a basic JavaScript AI that is loaded into every 'cell' (right now each team starts with 100). 
-      The object is to capture all of your enemies' cells. Like in the game <a href="http://en.wikipedia.org/wiki/Go_(game)">Go</a>, 
-      you capture an enemy cell by surrounding it on all sides (up, down, left, right). Currently both Red and Black are running an AI
-      called <a href="https://github.com/jeffcarp/vida/blob/master/cells/speeder-3.js">Speeder 3</a>.
-      <a href="https://twitter.com/jcarp">Let me know</a> if you have any comments or suggestions</a>. The next step is probably to set up a better demo 
-      that allows you to choose from a few different AI. The code is on <a href="https://github.com/jeffcarp/vida">GitHub</a>.
-      </div>
+  <div id="app"></div>
 
-    <table>
-      <tr>
-        <td>
-          <!-- <div id="grid"></div> -->
-          <canvas id="grid" width="800" height="800"></canvas>
-        </td>
-        <td>
-          <p onclick="begin()">Resume Match</p>
-          <p onclick="pause()">Pause Match</p>
-          <p onclick="iterate()">Step Once</p>
-          <p onclick="window.location=''">Reset Match</p>
-          <p>numBlack <span id="numBlack"></span></p>
-          <p>numRed <span id="numRed"></span></p>
-          <p>turn <span id="turn"></span></p>
-          <p id="out"></p>
-
-          <div id="shipinfo"></div>
-
-          <div class="player red">
-            <h3 id="redShip">Speeder 3</h3>
-            <div>51w 7l 9t</div>
-            <h4>Jeff Carpenter</h4>
-          </div>
-
-          <div class="player black">
-            <h3 id="blackShip">Speeder 3</h3>
-            <div>62w 1l 9t</div>
-            <h4>El Jefe</h4>
-          </div>
-        </td>
-      </tr>
-    </table>
-
-  </div>
+  <script src="react.min.js"></script> 
+  <script src="JSXTransformer.js"></script> 
+  <script src="vida.js" type="text/jsx"></script> 
 
   <script src="helpers.js"></script> 
 
@@ -67,9 +25,6 @@
     }; 
   </script>
 
-  <!-- Cells -->
-  <script src="cells/speeder-1.js"></script> 
-  <script src="cells/speeder-2.js"></script> 
   <script src="cells/speeder-3.js"></script> 
 
   <script src="runner.js"></script> 

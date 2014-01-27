@@ -1,42 +1,120 @@
-* { margin: 0; padding: 0; }
+* {
+  margin: 0;
+  padding: 0;
+}
 
-html, body { 
-  height: 100%; 
+html, body, #app {
+  height: 100%;
+  width: 100%;
 }
 
 body {
-  background-color: #aaa;
-  padding: 1em;
-}
-
-#content {
-  max-width: 960px;
-  margin: 0 auto;
+  font-size: 14px;
+  background-color: #222;
+  color: white;
+  font-family: Helvetica, Arial, sans-serif;
 }
 
 #grid {
   background-color: white;
-  border: solid 1px #ddd;
+  position: absolute;
+  top: 50%;
+  margin-top: -200px;
+  left: 50%;
+  margin-left: -200px;
 }
 
-p {
-  padding: 0 0 0.4em 0.6em;
+#app {
+  margin: 0 auto;
 }
 
-td {
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+table td {
   vertical-align: top;
 }
 
-.player {
-  border-radius: 3px;
-  color: white;
-  margin-bottom: 1em;
+table.arena {
+  height: 100%;
+}
+h4 {
+  font-size: 0.8em;
+  margin: 0 0 0.6em;
+}
+section {
+  margin: 0 0 1em;
+}
+.info {
+  font-size: 0.8em;
+  color: #bbb;
+}
+.leftTab, .rightTab {
   padding: 0.8em;
-  font-size: 14px;
 }
-.player.red {
-  background-color: maroon;
+.leftTab {
+  width: 200px;  
 }
-.player.black {
+.centerTab {
+  background-color: #111; 
+}
+.rightTab {
+  width: 200px;  
+}
+
+.badge {
+  margin: 0 0 1em;
+  border-radius: 0.2em;
+  padding: 0.5em;
+  background-color: rgba(255, 255, 255, 0.1);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+  .badge:hover {
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+  .badge h3 {
+    font-size: 1em;
+  }
+
+.pieces-distribution {
   background-color: black;
+  height: 20px;
+  border-radius: 0.2em;
+  margin: 0 0 0.5em;
+  position: relative;
+}
+  .red-percent {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    height: 20px;
+    background-color: maroon;
+    -webkit-transition: width 0.1s ease-in-out;
+    transition: width 0.1s ease-in-out;
+  }
+
+/* Parts of Fungible I can't live without */
+.pfr {
+  padding-right: 1em;
+}
+.pdb {
+  padding-bottom: 0.6em;
+}
+
+#message-bar {
+  padding: 0.75em;
+  opacity: 0;
+  -webkit-transition: opacity 0.2s ease-in-out;
+  transition: opacity 0.2s ease-in-out;
+}
+#message-bar.show {
+  opacity: 1;
+  background-color: rgba(14, 159, 251, 0.5);
 }
