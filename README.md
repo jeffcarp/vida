@@ -1,6 +1,6 @@
 # Vida
 
-Vida is a game for building and playing with emergent Artificial Intelligence in JavaScript. It takes inspiration from the game [Go](http://en.wikipedia.org/wiki/Go_(game)) and [Conway's Game of Life](http://en.wikipedia.org/wiki/Conway's_Game_of_Life).
+Vida is a game for building and playing with emergent Artificial Intelligence in JavaScript. It takes inspiration from the game [Go](http://en.wikipedia.org/wiki/Go_%28game%29) and [Conway's Game of Life](http://en.wikipedia.org/wiki/Conway's_Game_of_Life).
 
 ![Vida game in progress](http://jeffcarp.github.io/vida/images/sample-3.png)
 
@@ -31,6 +31,9 @@ ai.tick = function(turn, cells) {
 };
 ```
 
+The object of the game is to capture all your opponents pieces. Just like in Go, to capture a piece you must surround it on all 4 sides (up, down, left, right). The surrounding pieces don't need to be all enemy pieces (so it's possible to have "friendly fire").
+
 ## Open questions
 
 - How do we keep tick order deterministic and fair?
+- How do you get started making an AI for Vida?
