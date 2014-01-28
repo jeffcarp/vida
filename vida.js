@@ -2,61 +2,64 @@
 
 var Overlay = React.createClass({
   render: function() {
-    return (
-      <div id="overlay">
-        <div>
-          <h1 className="mcb">Welcome</h1>
-          <p><b>Vida</b> is a tool for building and playing with Artificial Intelligence in JavaScript.</p>
-          <p>To learn how to build your own Vida AI, <a href="">go through the tutorial</a>.</p>
-          <p>To play with pre-made AIs, select from the list of pre-made AIs below to load them into your cells.</p>
-          <table className="picker">
-            <tr>
-              <td>
-                <h2>Black Cell AI</h2>
-            
-                <div className="ai">
-                  <h3>Speeder</h3>
-                  <div>Aggressive, but not so great when it comes to defense.</div>
-                </div>
+    if (this.props.showOverlay) {
+      return (
+        <div id="overlay">
+          <div>
+            <h1 className="mcb">Welcome</h1>
+            <p><b>Vida</b> is a tool for building and playing with Artificial Intelligence in JavaScript.</p>
+            <p>To learn how to build your own Vida AI, <a href="">go through the tutorial</a>.</p>
+            <p onClick={this.props.toggleOverlay}>Or go directly to the arena</p>
+            <p>To play with pre-made AIs, select from the list of pre-made AIs below to load them into your cells.</p>
+            <table className="picker">
+              <tr>
+                <td>
+                  <h2>Black Cell AI</h2>
+              
+                  <div className="ai">
+                    <h3>Speeder</h3>
+                    <div>Aggressive, but not so great when it comes to defense.</div>
+                  </div>
 
-                <div className="ai">
-                  <p>Testudo</p>
-                  <div>Version 3</div>
-                  <p>Great on defense, no offense to speak of.</p>
-                </div>
+                  <div className="ai">
+                    <p>Testudo</p>
+                    <div>Version 3</div>
+                    <p>Great on defense, no offense to speak of.</p>
+                  </div>
 
-                <div className="ai">
-                  <p>Multi</p>
-                  <div>Version 3</div>
-                  <p>Forms groups, making it harder to kill.</p>
-                </div>
-              </td>
-              <td>
-                <h2>Red Cell AI</h2>
-            
-                <div className="ai">
-                  <p>Speeder</p>
-                  <div>Version 3</div>
-                  <p>Aggressive, but not so great when it comes to defense.</p>
-                </div>
+                  <div className="ai">
+                    <p>Multi</p>
+                    <div>Version 3</div>
+                    <p>Forms groups, making it harder to kill.</p>
+                  </div>
+                </td>
+                <td>
+                  <h2>Red Cell AI</h2>
+              
+                  <div className="ai">
+                    <p>Speeder</p>
+                    <div>Version 3</div>
+                    <p>Aggressive, but not so great when it comes to defense.</p>
+                  </div>
 
-                <div className="ai">
-                  <p>Testudo</p>
-                  <div>Version 3</div>
-                  <p>Great on defense, no offense to speak of.</p>
-                </div>
+                  <div className="ai">
+                    <p>Testudo</p>
+                    <div>Version 3</div>
+                    <p>Great on defense, no offense to speak of.</p>
+                  </div>
 
-                <div className="ai">
-                  <p>Multi</p>
-                  <div>Version 3</div>
-                  <p>Forms groups, making it harder to kill.</p>
-                </div>
-              </td>
-            </tr>
-          </table>
+                  <div className="ai">
+                    <p>Multi</p>
+                    <div>Version 3</div>
+                    <p>Forms groups, making it harder to kill.</p>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
   }
 });
 
@@ -178,7 +181,8 @@ var Root = React.createClass({
       running: false,
       turn: 0,
       blackAI: window.blackPrototype,
-      redAI: window.redPrototype
+      redAI: window.redPrototype,
+      showOverlay: true 
     };
   },
   toggleRunning: function() {
@@ -221,10 +225,16 @@ var Root = React.createClass({
       this.setState({speed: "Normal"});
     }
   },
+  toggleOverlay: function() {
+    this.setState({showOverlay: !this.state.showOverlay});
+  },
   render: function() {
     return (
       <div>
-        <Overlay />
+        <Overlay
+          showOverlay={this.state.showOverlay}
+          toggleOverlay={this.toggleOverlay}
+          />
         <table 
           className="arena">
           <tr>
