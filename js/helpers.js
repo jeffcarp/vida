@@ -21,3 +21,5 @@ aux.append = function(id, text) {
   elem.innerHTML = oldText+"<br />"+text;
 */
 };
+
+module.exports = aux;

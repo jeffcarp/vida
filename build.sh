@@ -1,3 +1,2 @@
 #!/bin/bash
-
-echo "build"
+browserify js/main.js > public/bundle.js

@@ -38,7 +38,14 @@ The object of the game is to capture all your opponents pieces. Just like in Go,
 - How do we keep tick order deterministic and fair?
 - How do you get started making an AI for Vida?
 
+## Ideas
+
+- What if cells could pass a signal to adjacent cells? Messages could spread similar to the way ants spread messages.
+- Reproduction and genetic mutation could be an interesting thing to add. Perhaps design the game such that any "pre-designed" cell would fail - only cells that fair well in the set environment would reproduce, allowing only the best-fit cells to survive, making sure the species adapted to its environment.
+- I think the game should allow for many different types of automata. Maybe this a good argument for the ability to build multicellular life (or the ability to evolve into it).
+
 ## Resources
 
 - [Von Neumann neighborhood](http://en.wikipedia.org/wiki/Von_Neumann_neighborhood)
 - [Manhattan Distance](http://en.wiktionary.org/wiki/Manhattan_distance) 
+- [Von Neumann cellular automation](http://en.wikipedia.org/wiki/Von_Neumann_cellular_automata)
