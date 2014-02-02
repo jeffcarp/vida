@@ -8,8 +8,8 @@ var blockSize = 4;
 var rotationSpeed = 50;
 var maxTurn = mapSize*mapSize;
 
+window.blackPrototype = "Speeder 4";
 window.redPrototype = "Speeder 3";
-window.blackPrototype = "Speeder 3";
 
 var tempNumberOfBlack = 0;
 var tempNumberOfRed = 0;

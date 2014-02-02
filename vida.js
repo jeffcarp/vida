@@ -10,48 +10,55 @@ var Overlay = React.createClass({
             <p><b>Vida</b> is a tool for building and playing with Artificial Intelligence in JavaScript.</p>
             <p>To learn how to build your own Vida AI, <a href="">go through the tutorial</a>.</p>
             <p onClick={this.props.toggleOverlay}>Or go directly to the arena</p>
-            <p>To play with pre-made AIs, select from the list of pre-made AIs below to load them into your cells.</p>
+            <p>To play with pre-made AIs, select them below to load them into your cells.</p>
             <table className="picker">
               <tr>
                 <td>
                   <h2>Black Cell AI</h2>
               
-                  <div className="ai">
-                    <h3>Speeder</h3>
+                  <div 
+                    onClick={this.props.chooseAI.bind(null, "black", "Speeder 3")}
+                    className="ai">
+                    <h3>Speeder 3</h3>
                     <div>Aggressive, but not so great when it comes to defense.</div>
                   </div>
 
-                  <div className="ai">
-                    <p>Testudo</p>
-                    <div>Version 3</div>
-                    <p>Great on defense, no offense to speak of.</p>
+                  <div 
+                    onClick={this.props.chooseAI.bind(null, "black", "Testudo 1")}
+                    className="ai">
+                    <h3>Testudo 1</h3>
+                    <div>Great on defense, no offense to speak of.</div>
                   </div>
 
-                  <div className="ai">
-                    <p>Multi</p>
-                    <div>Version 3</div>
-                    <p>Forms groups, making it harder to kill.</p>
+                  <div 
+                    onClick={this.props.chooseAI.bind(null, "black", "Multi 1")}
+                    className="ai">
+                    <p>Multi 1</p>
+                    <div>Forms groups, making it harder to kill.</div>
                   </div>
                 </td>
                 <td>
                   <h2>Red Cell AI</h2>
               
-                  <div className="ai">
-                    <p>Speeder</p>
-                    <div>Version 3</div>
-                    <p>Aggressive, but not so great when it comes to defense.</p>
+                  <div 
+                    onClick={this.props.chooseAI.bind(null, "red", "Speeder 3")}
+                    className="ai">
+                    <h3>Speeder 3</h3>
+                    <div>Aggressive, but not so great when it comes to defense.</div>
                   </div>
 
-                  <div className="ai">
-                    <p>Testudo</p>
-                    <div>Version 3</div>
-                    <p>Great on defense, no offense to speak of.</p>
+                  <div 
+                    onClick={this.props.chooseAI.bind(null, "red", "Testudo 1")}
+                    className="ai">
+                    <h3>Testudo 1</h3>
+                    <div>Great on defense, no offense to speak of.</div>
                   </div>
 
-                  <div className="ai">
-                    <p>Multi</p>
-                    <div>Version 3</div>
-                    <p>Forms groups, making it harder to kill.</p>
+                  <div 
+                    onClick={this.props.chooseAI.bind(null, "red", "Multi 1")}
+                    className="ai">
+                    <p>Multi 1</p>
+                    <div>Forms groups, making it harder to kill.</div>
                   </div>
                 </td>
               </tr>
@@ -59,6 +66,9 @@ var Overlay = React.createClass({
           </div>
         </div>
       );
+    }
+    else {
+      return <div></div>;
     }
   }
 });
@@ -114,7 +124,7 @@ var LeftTab = React.createClass({
           <h4>AI</h4>
 
           <p className="pdb">Black <b>{this.props.blackAI}</b></p>
-          <p>Red <b>{this.props.blackAI}</b></p>
+          <p className="pdb">Red <b>{this.props.redAI}</b></p>
         </section>
       </td>
     );
@@ -180,8 +190,8 @@ var Root = React.createClass({
       message: "",
       running: false,
       turn: 0,
-      blackAI: window.blackPrototype,
-      redAI: window.redPrototype,
+      blackAI: "",
+      redAI: "",
       showOverlay: true 
     };
   },
@@ -228,12 +238,23 @@ var Root = React.createClass({
   toggleOverlay: function() {
     this.setState({showOverlay: !this.state.showOverlay});
   },
+  chooseAI: function(color, ai) {
+    if (color == "black") {
+      window.blackPrototype = ai;
+      this.setState({blackAI: ai});
+    }
+    else {
+      window.redPrototype = ai;
+      this.setState({redAI: ai});
+    }
+  },
   render: function() {
     return (
-      <div>
+      <div id="app-inner">
         <Overlay
           showOverlay={this.state.showOverlay}
           toggleOverlay={this.toggleOverlay}
+          chooseAI={this.chooseAI}
           />
         <table 
           className="arena">
