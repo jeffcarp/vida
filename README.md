@@ -37,3 +37,8 @@ The object of the game is to capture all your opponents pieces. Just like in Go,
 
 - How do we keep tick order deterministic and fair?
 - How do you get started making an AI for Vida?
+
+## Resources
+
+- [Von Neumann neighborhood](http://en.wikipedia.org/wiki/Von_Neumann_neighborhood)
+- [Manhattan Distance](http://en.wiktionary.org/wiki/Manhattan_distance) 
