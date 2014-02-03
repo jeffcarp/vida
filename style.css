@@ -3,23 +3,22 @@
   padding: 0;
 }
 
-html, body, #app, #app-inner {
+html, body {
   height: 100%;
   width: 100%;
 }
 
 body {
   font-size: 14px;
-  background-color: #222;
+  overflow: hidden;
   color: white;
   font-family: Helvetica, Arial, sans-serif;
 }
 
 #grid {
-  background-color: #222;
-  border: solid 1px #333;
-  position: absolute;
+  background-color: #111;
   height: 100%;
+  width: 100%;
 }
 
 #app {

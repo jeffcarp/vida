@@ -7,7 +7,7 @@ var blockSize = 4;
 var config = {
   mapSize: mapSize/blockSize, 
   blockSize: blockSize,
-  speed: 2e3, 
+  speed: 1e3 
 };
 
 var runner = (require("./runner")).init(config);

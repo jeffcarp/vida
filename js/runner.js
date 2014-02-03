@@ -2,14 +2,12 @@
 var runner = {};
 
 // Dependencies
-var render = require("./render");
-
-var protoai = require("./protoai");
+var render = require("./render"),
+    protoai = require("./protoai"),
+    aux = require("./helpers");
 
 var game = {
   cells: [],
-  tunnels: [],
-  bases: [],
   time: 0
 };
 var config = {};
@@ -17,7 +15,6 @@ var config = {};
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
-  runner.generateBases(); // could be refactored to be more functional
   game.cells = runner.generateCells();
 
   // Hack to wait for DOM to load
@@ -34,37 +31,14 @@ runner.init = function(userConfig) {
 // Returns a clean slate of cells
 runner.generateCells = function() {
   var cells = [];
-  game.bases.forEach(function(b) {
-    cells.push({x: b.x+1, y: b.y+1, age: 0});
-    cells.push({x: b.x-1, y: b.y+1, age: 0});
-
-    cells.push({x: b.x-1, y: b.y, age: 0});
-    cells.push({x: b.x+1, y: b.y, age: 0});
-
-    cells.push({x: b.x+1, y: b.y-1, age: 0});
-    cells.push({x: b.x-1, y: b.y-1, age: 0});
-  });
-  return cells;
-};
-
-runner.generateBases = function() {
-
-  game.bases.push({
-    x: 0,
-    y: 0
-  });
-
-  // TODO: generate a base and tunnels surrounding it
-  var tunnels = [];
-  var hsize = 5;
-  for (var i = (-hsize); i<=hsize; i++) {
-    for (var j = (-hsize); j<=hsize; j++) {
-      if (i == 0 && j == 0) continue;
-      tunnels.push({x: i, y: j});
-    }
+  for (var i=0; i<20; i++) {
+    cells.push({
+      x: aux.rand(50)-25, 
+      y: aux.rand(50)-25, 
+      age: 0
+    });
   }
-
-  game.tunnels = tunnels;
+  return cells;
 };
 
 runner.defaultConfig = function(userConfig) {
@@ -106,13 +80,6 @@ runner.tickAllCells = function() {
     var desiredY = cell.y + move[1];
 
     // TODO: If valid
-    if (!runner.tunnelExists(desiredX, desiredY)) {
-      game.tunnels.push({
-        x: desiredX, 
-        y: desiredY
-      });
-    }
-
     if (!runner.cellExists(desiredX, desiredY)) {
       cell.x = desiredX;
       cell.y = desiredY;
@@ -124,26 +91,15 @@ runner.tickAllCells = function() {
 
 };
 
-runner.tunnelExists = function(x, y) {
-  return game.tunnels.some(function(t) {
-    return t.x == x && t.y == y;
-  })
-};
-
 runner.cellExists = function(x, y) {
   return game.cells.some(function(c) {
     return c.x == x && c.y == y;
   });
 };
 
-runner.baseExists = function(x, y) {
-  return game.bases.some(function(c) {
-    return c.x == x && c.y == y;
-  });
-};
-
 runner.vacant = function(x, y) {
-  return runner.tunnelExists(x, y) && !runner.cellExists(x, y) && !runner.baseExists(x, y);
+  // TODO: Add outOfBounds()
+  return !runner.cellExists(x, y); 
 };
 
 runner.validMove = function(move) {

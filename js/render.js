@@ -14,7 +14,6 @@ var setup = false;
 render.offsetX = 0;
 render.offsetY = 0;
 
-
 render.init = function(config) {
 
   setup = true;
@@ -22,7 +21,7 @@ render.init = function(config) {
   var gridID = "grid";
   var blockSize = config.blockSize;
   canvas = document.getElementById(gridID);
-  render.offsetX = render.offsetY = config.mapSize/2;
+  render.offsetX = render.offsetY = window.innerHeight/2;
 
   if (canvas.getContext) {
     ctx = canvas.getContext("2d");
@@ -30,6 +29,13 @@ render.init = function(config) {
   else {
     alert("Please switch to a browser that supports canvas.");
   }
+
+  render.resetCanvasAspect();
+
+      // Keep canvas's aspect ratio the same
+  window.onresize = function(e) {
+    render.resetCanvasAspect();
+  };
 
   var enteredX = null;
   var enteredY = null;
@@ -93,6 +99,11 @@ render.init = function(config) {
     render.draw();
   })();
 
+};
+
+render.resetCanvasAspect = function() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 };
 
 render.cachedCells;

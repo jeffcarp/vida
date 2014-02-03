@@ -5,7 +5,7 @@ var aux = require("./helpers");
 
 cellutil.randDir = function() {
   var move = [0, 0];
-  var i = aux.rand(2)-1;
+  var i = aux.rand(2);
   move[i] = aux.rand(3)-1; 
   return move;
 };
@@ -31,7 +31,7 @@ var blockSize = 4;
 var config = {
   mapSize: mapSize/blockSize, 
   blockSize: blockSize,
-  speed: 2e3, 
+  speed: 1e3 
 };
 
 var runner = (require("./runner")).init(config);
@@ -44,12 +44,14 @@ var protoai = {};
 var cellutil = require("./cellutil");
 
 protoai.tick = function(cell, neighborhood, messages, time) {
+  /*
   if (time % 2 == 0) {
     return [0, 1];
   }
   else {
+  */
     return cellutil.randDir();
-  }
+  //}
 };
 
 module.exports = protoai;
@@ -71,7 +73,6 @@ var setup = false;
 render.offsetX = 0;
 render.offsetY = 0;
 
-
 render.init = function(config) {
 
   setup = true;
@@ -79,7 +80,7 @@ render.init = function(config) {
   var gridID = "grid";
   var blockSize = config.blockSize;
   canvas = document.getElementById(gridID);
-  render.offsetX = render.offsetY = config.mapSize/2;
+  render.offsetX = render.offsetY = window.innerHeight/2;
 
   if (canvas.getContext) {
     ctx = canvas.getContext("2d");
@@ -87,6 +88,13 @@ render.init = function(config) {
   else {
     alert("Please switch to a browser that supports canvas.");
   }
+
+  render.resetCanvasAspect();
+
+      // Keep canvas's aspect ratio the same
+  window.onresize = function(e) {
+    render.resetCanvasAspect();
+  };
 
   var enteredX = null;
   var enteredY = null;
@@ -150,6 +158,11 @@ render.init = function(config) {
     render.draw();
   })();
 
+};
+
+render.resetCanvasAspect = function() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 };
 
 render.cachedCells;
@@ -233,14 +246,12 @@ module.exports = render;
 var runner = {};
 
 // Dependencies
-var render = require("./render");
-
-var protoai = require("./protoai");
+var render = require("./render"),
+    protoai = require("./protoai"),
+    aux = require("./helpers");
 
 var game = {
   cells: [],
-  tunnels: [],
-  bases: [],
   time: 0
 };
 var config = {};
@@ -248,7 +259,6 @@ var config = {};
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
-  runner.generateBases(); // could be refactored to be more functional
   game.cells = runner.generateCells();
 
   // Hack to wait for DOM to load
@@ -265,37 +275,14 @@ runner.init = function(userConfig) {
 // Returns a clean slate of cells
 runner.generateCells = function() {
   var cells = [];
-  game.bases.forEach(function(b) {
-    cells.push({x: b.x+1, y: b.y+1, age: 0});
-    cells.push({x: b.x-1, y: b.y+1, age: 0});
-
-    cells.push({x: b.x-1, y: b.y, age: 0});
-    cells.push({x: b.x+1, y: b.y, age: 0});
-
-    cells.push({x: b.x+1, y: b.y-1, age: 0});
-    cells.push({x: b.x-1, y: b.y-1, age: 0});
-  });
-  return cells;
-};
-
-runner.generateBases = function() {
-
-  game.bases.push({
-    x: 0,
-    y: 0
-  });
-
-  // TODO: generate a base and tunnels surrounding it
-  var tunnels = [];
-  var hsize = 5;
-  for (var i = (-hsize); i<=hsize; i++) {
-    for (var j = (-hsize); j<=hsize; j++) {
-      if (i == 0 && j == 0) continue;
-      tunnels.push({x: i, y: j});
-    }
+  for (var i=0; i<20; i++) {
+    cells.push({
+      x: aux.rand(50)-25, 
+      y: aux.rand(50)-25, 
+      age: 0
+    });
   }
-
-  game.tunnels = tunnels;
+  return cells;
 };
 
 runner.defaultConfig = function(userConfig) {
@@ -337,13 +324,6 @@ runner.tickAllCells = function() {
     var desiredY = cell.y + move[1];
 
     // TODO: If valid
-    if (!runner.tunnelExists(desiredX, desiredY)) {
-      game.tunnels.push({
-        x: desiredX, 
-        y: desiredY
-      });
-    }
-
     if (!runner.cellExists(desiredX, desiredY)) {
       cell.x = desiredX;
       cell.y = desiredY;
@@ -355,26 +335,15 @@ runner.tickAllCells = function() {
 
 };
 
-runner.tunnelExists = function(x, y) {
-  return game.tunnels.some(function(t) {
-    return t.x == x && t.y == y;
-  })
-};
-
 runner.cellExists = function(x, y) {
   return game.cells.some(function(c) {
     return c.x == x && c.y == y;
   });
 };
 
-runner.baseExists = function(x, y) {
-  return game.bases.some(function(c) {
-    return c.x == x && c.y == y;
-  });
-};
-
 runner.vacant = function(x, y) {
-  return runner.tunnelExists(x, y) && !runner.cellExists(x, y) && !runner.baseExists(x, y);
+  // TODO: Add outOfBounds()
+  return !runner.cellExists(x, y); 
 };
 
 runner.validMove = function(move) {
@@ -387,4 +356,4 @@ runner.validMove = function(move) {
 
 module.exports = runner;
 
-},{"./protoai":4,"./render":5}]},{},[3])
+},{"./helpers":2,"./protoai":4,"./render":5}]},{},[3])
