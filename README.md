@@ -44,6 +44,44 @@ The object of the game is to capture all your opponents pieces. Just like in Go,
 - Reproduction and genetic mutation could be an interesting thing to add. Perhaps design the game such that any "pre-designed" cell would fail - only cells that fair well in the set environment would reproduce, allowing only the best-fit cells to survive, making sure the species adapted to its environment.
 - I think the game should allow for many different types of automata. Maybe this a good argument for the ability to build multicellular life (or the ability to evolve into it).
 
+- Cells sending and receiving messages should be a neutral/blank API - "messages" can be anything.
+- A message could be a JSON object
+- Or a message could be to a wall, e.g. a "chip" off that wall
+- Or it could be an attack
+- The message could just be an extensible JSON object, e.g. 
+
+{x: 0, y: 0, action: "chip"} // Chip away at a wall
+{x: 0, y: 0, action: "attack"} // Attack an enemy
+{x: 0, y: 0, data: {target: 647}} // Convey an enemy target to another friendly ship
+
+===
+
+- I'd like to suggest limiting cell moves to its Von Neumann neighborhood. This would greatly simplify gameplay and diagonal moves don't add a huge benefit to the game. 
+
+===
+
+- I don't think 'bases' should be a thing. Your cells should be nomadic and distributed.
+- That still leaves the problem of where you spawn. Could you 'fork' off on an existing, possibly neutral cell? Possibly a neutral 2nd species that doesn't have anything to do with the game except excrete characters? (That doesn't solve the distribution problem)
+
+===
+
+- If walls are going to be at all necessary, they're going to have to be very hard to knock down
+- What purpose do walls serve?
+- Limit ability to easily interact other species 
+- Create barriers for yourself
+- However, programming with these barriers in mind sounds very difficult
+- If there were no walls and it was a completely open environment, first, it would have to be huuuge to make sure people weren't stepping on each others' feet, and second, in order to "win" at the game, you'd have to develop more complex, possibly multicellular organisms to be more resilient in a crowded, hostile environment.
+
+- Is the game about territory, or dominance? Or something else?
+
+- Do the cells need to consume other cells for "food" in order to survive? (Is there neutral food, like plankton, that anyone can eat?)
+
+- Might want to check out Spore from Maxis.
+
+- Still a big question: where do you spawn? A randomly chosen point? 
+
+- How do we manage the boundaries of the map? Do they roll over or are they fixed?
+
 ## Resources
 
 - [Von Neumann neighborhood](http://en.wikipedia.org/wiki/Von_Neumann_neighborhood)
