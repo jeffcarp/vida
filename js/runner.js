@@ -68,7 +68,7 @@ runner.createCell = function(options) {
     age: 0,
     ai: options.ai,
     type: options.type || "cell",
-    color: options.color ? options.color+1 : 0 
+    color: !isNaN(options.color) ? options.color+1 : 0 
   });
 };
 
@@ -118,7 +118,8 @@ runner.tickAllCells = function() {
     var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
     // Cell wants to reproduce
-    if (move[0] === 2 && move[1] === 2) {
+    // TEMPORARILY CAP CELL GROWTH
+    if (move[0] === 2 && move[1] === 2 && game.cells.length < 200) { 
       if (runner.vacant(cell.x+1, cell.y)) {
 
         // TODO: Introduce genetic mutation here

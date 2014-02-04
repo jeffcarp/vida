@@ -5,7 +5,7 @@ var aux = require("../helpers");
 
 food.tick = function(cell, neighborhood, messages, time) {
 
-  if (cell.age > 20 && aux.rand(17) === 1) {
+  if (cell.age > 20 && aux.rand(18) === 1) {
     return [2, 2]; // Reproduce
   }
 

@@ -6,7 +6,7 @@ var aux = require("../helpers");
 
 food.tick = function(cell, neighborhood, messages, time) {
 
-  if (cell.age > 20 && aux.rand(17) === 1) {
+  if (cell.age > 20 && aux.rand(18) === 1) {
     return [2, 2]; // Reproduce
   }
 
@@ -23,7 +23,7 @@ var aux = require("../helpers");
 
 protoai.tick = function(cell, neighborhood, messages, time) {
 
-  if (cell.age > 20 && aux.rand(19) === 1) {
+  if (cell.age > 20 && aux.rand(18) === 1) {
     return [2, 2]; // Reproduce
   }
 
@@ -315,7 +315,7 @@ runner.createCell = function(options) {
     age: 0,
     ai: options.ai,
     type: options.type || "cell",
-    color: options.color ? options.color+1 : 0 
+    color: !isNaN(options.color) ? options.color+1 : 0 
   });
 };
 
@@ -365,7 +365,8 @@ runner.tickAllCells = function() {
     var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
     // Cell wants to reproduce
-    if (move[0] === 2 && move[1] === 2) {
+    // TEMPORARILY CAP CELL GROWTH
+    if (move[0] === 2 && move[1] === 2 && game.cells.length < 200) { 
       if (runner.vacant(cell.x+1, cell.y)) {
 
         // TODO: Introduce genetic mutation here
