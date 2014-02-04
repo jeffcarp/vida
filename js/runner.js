@@ -3,8 +3,13 @@ var runner = {};
 
 // Dependencies
 var render = require("./render"),
-    protoai = require("./protoai"),
     aux = require("./helpers");
+
+var ais = {
+  "protoai": require("./cells/protoai"),
+  "food": require("./cells/food"),
+  "rando": require("./cells/rando") 
+};
 
 var game = {
   cells: [],
@@ -15,7 +20,8 @@ var config = {};
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
-  game.cells = runner.generateCells();
+  runner.generateCells();
+  runner.generateFood();
 
   // Hack to wait for DOM to load
   window.setTimeout(function() {
@@ -30,15 +36,40 @@ runner.init = function(userConfig) {
 
 // Returns a clean slate of cells
 runner.generateCells = function() {
-  var cells = [];
-  for (var i=0; i<20; i++) {
-    cells.push({
-      x: aux.rand(50)-25, 
-      y: aux.rand(50)-25, 
-      age: 0
+  var num = 50;
+  for (var i=0; i<num; i++) {
+    runner.createCell({
+      x: aux.rand(num*4)-num*2, 
+      y: aux.rand(num*4)-num*2,
+      ai: "protoai"
     });
   }
-  return cells;
+};
+
+runner.generateFood = function() {
+  var cells = [];
+  for (var i=0; i<5; i++) {
+    runner.createCell({
+      x: aux.rand(50)-25, 
+      y: aux.rand(50)-25,
+      type: "food",
+      ai: "food"
+    });
+  }
+};
+
+runner.createCell = function(options) {
+  if (isNaN(options.x)) return; 
+  if (isNaN(options.y)) return; 
+  if (!ais[options.ai]) return;
+  game.cells.push({
+    x: options.x,
+    y: options.y,
+    age: 0,
+    ai: options.ai,
+    type: options.type || "cell",
+    color: options.color ? options.color+1 : 0 
+  });
 };
 
 runner.defaultConfig = function(userConfig) {
@@ -63,32 +94,70 @@ runner.tickAllCells = function() {
     cell.age += 1;
 
     // Cells die of old age
-    // TODO: figure out reproduction
-/*
-    if (cell.age > 40) {
-      var i = game.cells.indexOf(cell);
-      if (i != -1) game.cells.splice(i, 1);
+    if (cell.age > 30) {
+      var death = aux.rand(100 - cell.age);
+      if (death < 2) {
+        runner.removeCell(cell);
+      }
     }
-*/
+
+    // Cells die of overcrowding
+    var dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+    var atari = dirs.some(function(d) {
+      return runner.vacant(cell.x+d[0], cell.y+d[1]);
+    });
+    if (!atari) {
+      runner.removeCell(cell);
+    }
 
     // Get its desired move
-    var move = protoai.tick(cell, {}, [], game.time);
+    // TODO: Pass in neighborhood
+    // TODO: Pass in messages
+    var neighborhood = {}; 
+    var messages = []; 
+    var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
-    if (!runner.validMove(move)) return;
+    // Cell wants to reproduce
+    if (move[0] === 2 && move[1] === 2) {
+      if (runner.vacant(cell.x+1, cell.y)) {
 
-    var desiredX = cell.x + move[0];
-    var desiredY = cell.y + move[1];
+        // TODO: Introduce genetic mutation here
+        // TODO: Make reproduction take a lot of resources
+        runner.createCell({
+          x: cell.x+1, 
+          y: cell.y,
+          ai: cell.ai,
+          type: cell.type,
+          color: cell.color
+        });
 
-    // TODO: If valid
-    if (!runner.cellExists(desiredX, desiredY)) {
-      cell.x = desiredX;
-      cell.y = desiredY;
+        cell.age = 80;
+      
+      }
+    }
+    else {
+
+      if (!runner.validMove(move)) return;
+
+      var desiredX = cell.x + move[0];
+      var desiredY = cell.y + move[1];
+
+      // TODO: If valid
+      if (!runner.cellExists(desiredX, desiredY)) {
+        cell.x = desiredX;
+        cell.y = desiredY;
+      }
     }
     
   });
 
   render.setVars(game, config);
 
+};
+
+runner.removeCell = function(cell) {
+  var i = game.cells.indexOf(cell);
+  if (i != -1) game.cells.splice(i, 1);
 };
 
 runner.cellExists = function(x, y) {

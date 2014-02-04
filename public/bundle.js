@@ -1,7 +1,52 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var food = {};
+
+var cellutil = require("./util");
+var aux = require("../helpers");
+
+food.tick = function(cell, neighborhood, messages, time) {
+
+  if (cell.age > 20 && aux.rand(17) === 1) {
+    return [2, 2]; // Reproduce
+  }
+
+  return cellutil.randDir();
+};
+
+module.exports = food;
+
+},{"../helpers":5,"./util":4}],2:[function(require,module,exports){
+var protoai = {};
+
+var cellutil = require("./util");
+var aux = require("../helpers");
+
+protoai.tick = function(cell, neighborhood, messages, time) {
+
+  if (cell.age > 20 && aux.rand(19) === 1) {
+    return [2, 2]; // Reproduce
+  }
+
+  return cellutil.randDir();
+};
+
+module.exports = protoai;
+
+},{"../helpers":5,"./util":4}],3:[function(require,module,exports){
+var protoai = {};
+
+var cellutil = require("./util");
+
+protoai.tick = function(cell, neighborhood, messages, time) {
+  return cellutil.randDir();
+};
+
+module.exports = protoai;
+
+},{"./util":4}],4:[function(require,module,exports){
 var cellutil = {};
 
-var aux = require("./helpers");
+var aux = require("../helpers");
 
 cellutil.randDir = function() {
   var move = [0, 0];
@@ -12,7 +57,7 @@ cellutil.randDir = function() {
 
 module.exports = cellutil;
 
-},{"./helpers":2}],2:[function(require,module,exports){
+},{"../helpers":5}],5:[function(require,module,exports){
 var aux = {};
 
 aux.rand = function(num) {
@@ -21,7 +66,7 @@ aux.rand = function(num) {
 
 module.exports = aux;
 
-},{}],3:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 
 
 var mapSize = document.getElementById("grid").width;
@@ -31,32 +76,14 @@ var blockSize = 4;
 var config = {
   mapSize: mapSize/blockSize, 
   blockSize: blockSize,
-  speed: 1e3 
+  speed: 50 
 };
 
 var runner = (require("./runner")).init(config);
 
 
 
-},{"./runner":6}],4:[function(require,module,exports){
-var protoai = {};
-
-var cellutil = require("./cellutil");
-
-protoai.tick = function(cell, neighborhood, messages, time) {
-  /*
-  if (time % 2 == 0) {
-    return [0, 1];
-  }
-  else {
-  */
-    return cellutil.randDir();
-  //}
-};
-
-module.exports = protoai;
-
-},{"./cellutil":1}],5:[function(require,module,exports){
+},{"./runner":8}],7:[function(require,module,exports){
 /* 
 # Vida Renderer
 
@@ -72,6 +99,12 @@ var ctx;
 var setup = false;
 render.offsetX = 0;
 render.offsetY = 0;
+render.zoom = 1;
+
+window.setZoom = function(zoom) {
+  render.zoom = zoom;
+  render.resetCanvasAspect();
+};
 
 render.init = function(config) {
 
@@ -102,16 +135,14 @@ render.init = function(config) {
   var ofsY = null;
 
   canvas.addEventListener("mousedown", function(e) { 
-    console.log("mousedown");
-    enteredX = e.x - canvas.offsetLeft;
-    enteredY = e.y - canvas.offsetTop;
+    enteredX = (e.x - canvas.offsetLeft) * render.zoom;
+    enteredY = (e.y - canvas.offsetTop) * render.zoom;
     ofsX = render.offsetX;
     ofsY = render.offsetY;
   });
 
 
   canvas.addEventListener("mouseup", function(e) {
-    console.log("mouseup");
     enteredX = null;
     enteredY = null;
     ofsX = null;
@@ -119,7 +150,6 @@ render.init = function(config) {
   });
 
   canvas.addEventListener("mouseout", function(e) {
-    console.log("mouseout");
     enteredX = null;
     enteredY = null;
     ofsX = null;
@@ -129,24 +159,20 @@ render.init = function(config) {
   canvas.addEventListener("mousemove", function(e) {
     if (!enteredX || !enteredY) return; 
 
-    var ex = e.x - canvas.offsetLeft;
-    var ey = e.y - canvas.offsetTop;
-    console.log("ex, ey", ex, ey);
-    console.log("entered", enteredX, enteredY);
+    var ex = (e.x - canvas.offsetLeft) * render.zoom;
+    var ey = (e.y - canvas.offsetTop) * render.zoom;
 
     render.offsetX = (ex - enteredX) + ofsX;
     render.offsetY = (ey - enteredY) + ofsY;
-    console.log("offsets", render.offsetX, render.offsetY);
-    //render.draw();
   });
 
   window.requestAnimFrame = (function(){
-    return  window.requestAnimationFrame       ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame    ||
-            function( callback ){
-              window.setTimeout(callback, 1000 / 60);
-            };
+    return window.requestAnimationFrame       ||
+           window.webkitRequestAnimationFrame ||
+           window.mozRequestAnimationFrame    ||
+           function(callback) {
+             window.setTimeout(callback, 1000 / 60);
+           };
   })();
 
 
@@ -161,13 +187,11 @@ render.init = function(config) {
 };
 
 render.resetCanvasAspect = function() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth*render.zoom;
+  canvas.height = window.innerHeight*render.zoom;
 };
 
 render.cachedCells;
-render.cachedTunnels;
-render.cachedBases;
 render.cachedBlockSize;
 
 render.setVars = function(game, config) {
@@ -175,13 +199,9 @@ render.setVars = function(game, config) {
   config = config || {};
 
   var cells = game.cells || render.cachedCells || [];
-  var tunnels = game.tunnels || render.cachedTunnels || [];
-  var bases = game.bases || render.cachedBases || [];
   var blockSize = config.blockSize || render.cachedBlockSize || 2;
 
   render.cachedCells = cells;
-  render.cachedTunnels = tunnels;
-  render.cachedBases = bases;
   render.cachedBlockSize = blockSize;
 };
 
@@ -194,38 +214,21 @@ render.draw = function(game, config) {
   config = config || {};
 
   var cells = game.cells || render.cachedCells || [];
-  var tunnels = game.tunnels || render.cachedTunnels || [];
-  var bases = game.bases || render.cachedBases || [];
   var blockSize = config.blockSize || render.cachedBlockSize || 2;
 
   render.cachedCells = cells;
-  render.cachedTunnels = tunnels;
-  render.cachedBases = bases;
   render.cachedBlockSize = blockSize;
 
   // Clear grid
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  bases.forEach(function(base) {
-    ctx.fillStyle = "#fff";
-    ctx.fillRect(
-      (base.x*blockSize)+render.offsetX, 
-      (base.y*blockSize)+render.offsetY, 
-      blockSize, 
-      blockSize);
-  });
-
-  tunnels.forEach(function(tunnel) {
-    ctx.fillStyle = "#111";
-    ctx.fillRect(
-      (tunnel.x*blockSize)+render.offsetX, 
-      (tunnel.y*blockSize)+render.offsetY, 
-      blockSize, 
-      blockSize);
-  });
-
   cells.forEach(function(cell) {
-    ctx.fillStyle = "blue";//cell.color == "black" ? "black" : "maroon";
+    if (cell.type === "food") {
+      ctx.fillStyle = "green";
+    }
+    else {
+      ctx.fillStyle = "hsl("+cell.color+", 50%, 40%)";
+    }
 
     // Now instead of just going from the origin, we have to convert
     //   our cells' central origin coords to the canvas's top left coords
@@ -241,14 +244,19 @@ render.draw = function(game, config) {
 
 module.exports = render;
 
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 // Vida Runner
 var runner = {};
 
 // Dependencies
 var render = require("./render"),
-    protoai = require("./protoai"),
     aux = require("./helpers");
+
+var ais = {
+  "protoai": require("./cells/protoai"),
+  "food": require("./cells/food"),
+  "rando": require("./cells/rando") 
+};
 
 var game = {
   cells: [],
@@ -259,7 +267,8 @@ var config = {};
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
-  game.cells = runner.generateCells();
+  runner.generateCells();
+  runner.generateFood();
 
   // Hack to wait for DOM to load
   window.setTimeout(function() {
@@ -274,15 +283,40 @@ runner.init = function(userConfig) {
 
 // Returns a clean slate of cells
 runner.generateCells = function() {
-  var cells = [];
-  for (var i=0; i<20; i++) {
-    cells.push({
-      x: aux.rand(50)-25, 
-      y: aux.rand(50)-25, 
-      age: 0
+  var num = 50;
+  for (var i=0; i<num; i++) {
+    runner.createCell({
+      x: aux.rand(num*4)-num*2, 
+      y: aux.rand(num*4)-num*2,
+      ai: "protoai"
     });
   }
-  return cells;
+};
+
+runner.generateFood = function() {
+  var cells = [];
+  for (var i=0; i<5; i++) {
+    runner.createCell({
+      x: aux.rand(50)-25, 
+      y: aux.rand(50)-25,
+      type: "food",
+      ai: "food"
+    });
+  }
+};
+
+runner.createCell = function(options) {
+  if (isNaN(options.x)) return; 
+  if (isNaN(options.y)) return; 
+  if (!ais[options.ai]) return;
+  game.cells.push({
+    x: options.x,
+    y: options.y,
+    age: 0,
+    ai: options.ai,
+    type: options.type || "cell",
+    color: options.color ? options.color+1 : 0 
+  });
 };
 
 runner.defaultConfig = function(userConfig) {
@@ -307,32 +341,70 @@ runner.tickAllCells = function() {
     cell.age += 1;
 
     // Cells die of old age
-    // TODO: figure out reproduction
-/*
-    if (cell.age > 40) {
-      var i = game.cells.indexOf(cell);
-      if (i != -1) game.cells.splice(i, 1);
+    if (cell.age > 30) {
+      var death = aux.rand(100 - cell.age);
+      if (death < 2) {
+        runner.removeCell(cell);
+      }
     }
-*/
+
+    // Cells die of overcrowding
+    var dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+    var atari = dirs.some(function(d) {
+      return runner.vacant(cell.x+d[0], cell.y+d[1]);
+    });
+    if (!atari) {
+      runner.removeCell(cell);
+    }
 
     // Get its desired move
-    var move = protoai.tick(cell, {}, [], game.time);
+    // TODO: Pass in neighborhood
+    // TODO: Pass in messages
+    var neighborhood = {}; 
+    var messages = []; 
+    var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
-    if (!runner.validMove(move)) return;
+    // Cell wants to reproduce
+    if (move[0] === 2 && move[1] === 2) {
+      if (runner.vacant(cell.x+1, cell.y)) {
 
-    var desiredX = cell.x + move[0];
-    var desiredY = cell.y + move[1];
+        // TODO: Introduce genetic mutation here
+        // TODO: Make reproduction take a lot of resources
+        runner.createCell({
+          x: cell.x+1, 
+          y: cell.y,
+          ai: cell.ai,
+          type: cell.type,
+          color: cell.color
+        });
 
-    // TODO: If valid
-    if (!runner.cellExists(desiredX, desiredY)) {
-      cell.x = desiredX;
-      cell.y = desiredY;
+        cell.age = 80;
+      
+      }
+    }
+    else {
+
+      if (!runner.validMove(move)) return;
+
+      var desiredX = cell.x + move[0];
+      var desiredY = cell.y + move[1];
+
+      // TODO: If valid
+      if (!runner.cellExists(desiredX, desiredY)) {
+        cell.x = desiredX;
+        cell.y = desiredY;
+      }
     }
     
   });
 
   render.setVars(game, config);
 
+};
+
+runner.removeCell = function(cell) {
+  var i = game.cells.indexOf(cell);
+  if (i != -1) game.cells.splice(i, 1);
 };
 
 runner.cellExists = function(x, y) {
@@ -356,4 +428,4 @@ runner.validMove = function(move) {
 
 module.exports = runner;
 
-},{"./helpers":2,"./protoai":4,"./render":5}]},{},[3])
+},{"./cells/food":1,"./cells/protoai":2,"./cells/rando":3,"./helpers":5,"./render":7}]},{},[6])

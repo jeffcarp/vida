@@ -1,6 +1,6 @@
 var cellutil = {};
 
-var aux = require("./helpers");
+var aux = require("../helpers");
 
 cellutil.randDir = function() {
   var move = [0, 0];
