@@ -68,7 +68,7 @@ runner.createCell = function(options) {
     age: 0,
     ai: options.ai,
     type: options.type || "cell",
-    color: !isNaN(options.color) ? options.color+1 : 0 
+    color: !isNaN(options.color) ? options.color+10 : 0 
   });
 };
 
@@ -83,6 +83,22 @@ runner.defaultConfig = function(userConfig) {
   });
 };
 
+
+// Right now this introduces a bunch of randos
+// around a random spawn near the origin
+runner.introduce = function() {
+  var num = 20;
+  var origin = 500;
+  var xOff = aux.rand(origin) - origin/2;
+  var yOff = aux.rand(origin) - origin/2;
+  for (var i=0; i<num; i++) {
+    runner.createCell({
+      x: aux.rand(num*4)-num*2 + xOff, 
+      y: aux.rand(num*4)-num*2 + yOff,
+      ai: "protoai"
+    });
+  }
+};
 runner.tickAllCells = function() {
 
   game.time += 1;

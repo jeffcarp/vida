@@ -13,11 +13,28 @@ var ctx;
 var setup = false;
 render.offsetX = 0;
 render.offsetY = 0;
-render.zoom = 1;
+render.zoom = 2;
 
-window.setZoom = function(zoom) {
+render.zoomOut = function() {
+  render.setZoom(render.zoom + 1);
+};
+
+render.zoomIn = function() {
+  if (render.zoom <= 1) return;
+  render.setZoom(render.zoom - 1);
+};
+
+render.setZoom = function(zoom) {
+  var prevZoom = render.zoom;
   render.zoom = zoom;
+  render.offsetX = (render.offsetX / prevZoom) * render.zoom;
+  render.offsetY = (render.offsetY / prevZoom) * render.zoom;
   render.resetCanvasAspect();
+};
+
+render.centerCells = function() {
+  // Go through all cells, compute average origin
+  // Go to that origin
 };
 
 render.init = function(config) {
@@ -27,7 +44,10 @@ render.init = function(config) {
   var gridID = "grid";
   var blockSize = config.blockSize;
   canvas = document.getElementById(gridID);
-  render.offsetX = render.offsetY = window.innerHeight/2;
+  // TODO: Make this respect previous offsets
+  // (currently it puts you back at (0, 0)
+  render.offsetX = (window.innerWidth/2)*render.zoom;
+  render.offsetY = (window.innerHeight/2)*render.zoom;
 
   if (canvas.getContext) {
     ctx = canvas.getContext("2d");

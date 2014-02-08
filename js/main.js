@@ -1,7 +1,5 @@
-
-
 var mapSize = document.getElementById("grid").width;
-var blockSize = 4;
+var blockSize = 5;
 
 // Game params
 var config = {
@@ -12,4 +10,6 @@ var config = {
 
 var runner = (require("./runner")).init(config);
 
+window.React = require("./react");
 
+require("./controls.jsx");
