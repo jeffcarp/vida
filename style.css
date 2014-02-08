@@ -3,70 +3,62 @@
   padding: 0;
 }
 
-html, body, #app {
+html, body {
   height: 100%;
   width: 100%;
+  position: relative;
 }
 
 body {
   font-size: 14px;
-  background-color: #222;
+  overflow: hidden;
   color: white;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", "Helvetica", "Arial", "sans-serif";
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+  border-bottom: dotted 1px #aaa;
+}
+a:hover {
+  color: #ddd;
+  border-color: #ddd;
+}
+
+h1, h2, h3, h4, h5 {
+  font-size: 1em;
+}
+
+p {
+  line-height: 20px;
+}
+
+#left {
+  position: absolute;
+  width: 200px;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 1em;
+  overflow-y: auto;
+}
+#left h1 {
+  font-size: 1.2em;
 }
 
 #grid {
-  background-color: white;
-  position: absolute;
-  top: 50%;
-  margin-top: -200px;
-  left: 50%;
-  margin-left: -200px;
-}
-
-#app {
-  margin: 0 auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-table td {
-  vertical-align: top;
-}
-
-table.arena {
+  background-color: #111;
   height: 100%;
-}
-h4 {
-  font-size: 0.8em;
-  margin: 0 0 0.6em;
-}
-section {
-  margin: 0 0 1em;
-}
-.info {
-  font-size: 0.8em;
-  color: #bbb;
-}
-.leftTab, .rightTab {
-  padding: 0.8em;
-}
-.leftTab {
-  width: 200px;  
-}
-.centerTab {
-  background-color: #111; 
-}
-.rightTab {
-  width: 200px;  
+  width: 100%;
 }
 
-.badge {
+.butn {
   margin: 0 0 1em;
   border-radius: 0.2em;
   padding: 0.5em;
+  font-weight: bold;
   background-color: rgba(255, 255, 255, 0.1);
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -75,14 +67,27 @@ section {
   -ms-user-select: none;
   user-select: none;
 }
-  .badge:hover {
-    cursor: pointer;
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-  .badge h3 {
-    font-size: 1em;
-  }
+.butn:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.2);
+}
 
+.small {
+  font-size: 13px;
+}
+
+/* Fungible subset */
+.mfb {
+  margin-bottom: 1em;
+}
+.mfx {
+  margin-right: 1em;
+  margin-left: 1em;
+}
+
+
+
+/*
 .pieces-distribution {
   background-color: black;
   height: 20px;
@@ -100,12 +105,14 @@ section {
     transition: width 0.1s ease-in-out;
   }
 
-/* Parts of Fungible I can't live without */
 .pfr {
   padding-right: 1em;
 }
 .pdb {
   padding-bottom: 0.6em;
+}
+.mcb {
+  margin-bottom: 0.4em;
 }
 
 #message-bar {
@@ -118,3 +125,32 @@ section {
   opacity: 1;
   background-color: rgba(14, 159, 251, 0.5);
 }
+
+#overlay {
+  position: fixed;
+  z-index: 5;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+#overlay > div {
+  color: white;
+  max-width: 500px;
+  background-color: rgba(0, 0, 0, 0.9);
+  margin: 1% auto 0;
+  padding: 2em;
+}
+#overlay > div p {
+  font-size: 15px;
+  margin-bottom: 1em;
+}
+#overlay > div a {
+  color: white;
+  padding-bottom: 2px;
+  border-bottom: dotted 1px white;
+}
+#overlay > div a:hover {
+    color: #ddd;
+    border-bottom: dotted 1px #ddd;
+  }
+*/

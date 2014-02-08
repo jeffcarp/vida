@@ -9,25 +9,16 @@
 </head>
 <body>
 
-  <div id="app"></div>
+  <div id="controls">
+    <div id="leftbar">yeah</div>
+  </div>
 
-  <script src="react.min.js"></script> 
-  <script src="JSXTransformer.js"></script> 
-  <script src="vida.js" type="text/jsx"></script> 
+  <canvas 
+    id="grid" 
+    ></canvas>
 
-  <script src="helpers.js"></script> 
-
-  <script>
-    // Open ship registry 
-    var shipModels = {};
-    var register = function(name, shipType) { 
-      shipModels[name] = shipType;
-    }; 
-  </script>
-
-  <script src="cells/speeder-3.js"></script> 
-
-  <script src="runner.js"></script> 
+  <script src="public/JSXTransformer.js"></script> 
+  <script src="public/bundle.js"></script> 
 
 </body>
 </html>
