@@ -5,7 +5,7 @@ var aux = require("../helpers");
 
 protoai.tick = function(cell, neighborhood, messages, time) {
 
-  if (cell.age > 20 && aux.rand(18) === 1) {
+  if (cell.age > 20 && aux.rand(25) === 1) {
     return [2, 2]; // Reproduce
   }
 

@@ -162,11 +162,11 @@ runner.tickAllCells = function() {
 
     // Cell wants to reproduce
     // TEMPORARILY CAP CELL GROWTH
-    if (move[0] === 2 && move[1] === 2 && game.cells.length < 1000) { 
+    if (move[0] === 2 && move[1] === 2) { // && game.cells.length < 1000) { Danger zone
       if (runner.vacant(cell.x+1, cell.y)) {
 
         // TODO: Introduce genetic mutation here
-        // TODO: Make reproduction take a lot of resources
+        // TODO: Make reproduction take a lot of x-resources-- energy 
         runner.createCell({
           x: cell.x+1, 
           y: cell.y,
@@ -175,7 +175,7 @@ runner.tickAllCells = function() {
           color: cell.color
         });
 
-        cell.age = 80;
+        //cell.age = 60;
       
       }
     }
@@ -196,6 +196,30 @@ runner.tickAllCells = function() {
 
   render.setVars(game, config);
 
+  runner.emit("end tick", {
+    population: game.cells.length
+  });
+};
+
+runner.population = function() {
+  return game.cells.length;
+};
+
+var _callbacks = {};
+runner.emit = function(action, data) {
+  if (action in _callbacks) {
+    _callbacks[action].forEach(function(callback) {
+      callback.call(null, data);
+    });
+  } 
+};
+runner.on = function(action, callback) {
+  if (action in _callbacks) {
+    _callbacks[action].push(callback);
+  }
+  else {
+    _callbacks[action] = [callback];
+  }
 };
 
 runner.move = function(cell, x, y) {

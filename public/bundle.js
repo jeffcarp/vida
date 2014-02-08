@@ -23,7 +23,7 @@ var aux = require("../helpers");
 
 protoai.tick = function(cell, neighborhood, messages, time) {
 
-  if (cell.age > 20 && aux.rand(18) === 1) {
+  if (cell.age > 20 && aux.rand(25) === 1) {
     return [2, 2]; // Reproduce
   }
 
@@ -64,6 +64,24 @@ var runner = require("./runner");
 var render = require("./render");
 
 var Left = React.createClass({displayName: 'Left',
+  getInitialState: function() {
+    return ({
+      population: 0
+    });
+  },
+  updatePopulation: function(data) {
+    this.setState({
+      population: data.population
+    });
+  },
+  componentWillMount: function() {
+  },
+  componentDidMount: function() {
+    var self = this;
+    runner.on("end tick", function(data) {
+      self.updatePopulation(data);
+    });
+  },
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
@@ -91,24 +109,16 @@ var Left = React.createClass({displayName: 'Left',
             , "Start/Stop")
         ),
 
+        React.DOM.h2( {className:"mfb"}, "Statistics"),
+        React.DOM.p( {className:"mfb"}, "Population: ", React.DOM.span(null, this.state.population)),
+
         React.DOM.h2( {className:"mfb"}, "Introduce AIs"),
 
         React.DOM.div( 
           {onClick:runner.introduce,
           className:"butn"}
-          , "Rando"),
+          , "Rando")
 
-        React.DOM.p( {className:"mfx mfb small"}, "Rando is dumb as a sack of bricks. source code."),
-
-        React.DOM.div( 
-          {onClick:this.introduce,
-          className:"butn"}
-          , "Speeder - always moving"),
-
-        React.DOM.div( 
-          {onClick:this.introduce,
-          className:"butn"}
-          , "Testudo - reinforced")
       )
     );
   }
@@ -130,7 +140,7 @@ module.exports = aux;
 
 },{}],7:[function(require,module,exports){
 var mapSize = document.getElementById("grid").width;
-var blockSize = 5;
+var blockSize = 4;
 
 // Game params
 var config = {
@@ -186,17 +196,18 @@ render.offsetY = 0;
 render.zoom = 2;
 
 render.zoomOut = function() {
-  render.setZoom(render.zoom + 1);
+  render.setZoom(render.zoom + 0.5);
 };
 
 render.zoomIn = function() {
   if (render.zoom <= 1) return;
-  render.setZoom(render.zoom - 1);
+  render.setZoom(render.zoom - 0.5);
 };
 
 render.setZoom = function(zoom) {
   var prevZoom = render.zoom;
   render.zoom = zoom;
+  // TODO: This still zooms in around the origin
   render.offsetX = (render.offsetX / prevZoom) * render.zoom;
   render.offsetY = (render.offsetY / prevZoom) * render.zoom;
   render.resetCanvasAspect();
@@ -331,7 +342,13 @@ render.draw = function(game, config) {
       ctx.fillStyle = "green";
     }
     else {
-      ctx.fillStyle = "hsl("+cell.color+", 50%, 40%)";
+      if (cell.age < 20) {
+        var lum = 80 - cell.age*2; 
+      }
+      else {
+        var lum = 40; 
+      }
+      ctx.fillStyle = "hsl("+cell.color+", 50%, "+lum+"%)";
     }
 
     // Now instead of just going from the origin, we have to convert
@@ -513,11 +530,11 @@ runner.tickAllCells = function() {
 
     // Cell wants to reproduce
     // TEMPORARILY CAP CELL GROWTH
-    if (move[0] === 2 && move[1] === 2 && game.cells.length < 1000) { 
+    if (move[0] === 2 && move[1] === 2) { // && game.cells.length < 1000) { Danger zone
       if (runner.vacant(cell.x+1, cell.y)) {
 
         // TODO: Introduce genetic mutation here
-        // TODO: Make reproduction take a lot of resources
+        // TODO: Make reproduction take a lot of x-resources-- energy 
         runner.createCell({
           x: cell.x+1, 
           y: cell.y,
@@ -526,7 +543,7 @@ runner.tickAllCells = function() {
           color: cell.color
         });
 
-        cell.age = 80;
+        //cell.age = 60;
       
       }
     }
@@ -547,6 +564,30 @@ runner.tickAllCells = function() {
 
   render.setVars(game, config);
 
+  runner.emit("end tick", {
+    population: game.cells.length
+  });
+};
+
+runner.population = function() {
+  return game.cells.length;
+};
+
+var _callbacks = {};
+runner.emit = function(action, data) {
+  if (action in _callbacks) {
+    _callbacks[action].forEach(function(callback) {
+      callback.call(null, data);
+    });
+  } 
+};
+runner.on = function(action, callback) {
+  if (action in _callbacks) {
+    _callbacks[action].push(callback);
+  }
+  else {
+    _callbacks[action] = [callback];
+  }
 };
 
 runner.move = function(cell, x, y) {

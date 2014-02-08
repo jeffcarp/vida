@@ -1,5 +1,5 @@
 var mapSize = document.getElementById("grid").width;
-var blockSize = 5;
+var blockSize = 4;
 
 // Game params
 var config = {

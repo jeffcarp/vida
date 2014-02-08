@@ -16,17 +16,18 @@ render.offsetY = 0;
 render.zoom = 2;
 
 render.zoomOut = function() {
-  render.setZoom(render.zoom + 1);
+  render.setZoom(render.zoom + 0.5);
 };
 
 render.zoomIn = function() {
   if (render.zoom <= 1) return;
-  render.setZoom(render.zoom - 1);
+  render.setZoom(render.zoom - 0.5);
 };
 
 render.setZoom = function(zoom) {
   var prevZoom = render.zoom;
   render.zoom = zoom;
+  // TODO: This still zooms in around the origin
   render.offsetX = (render.offsetX / prevZoom) * render.zoom;
   render.offsetY = (render.offsetY / prevZoom) * render.zoom;
   render.resetCanvasAspect();
@@ -161,7 +162,13 @@ render.draw = function(game, config) {
       ctx.fillStyle = "green";
     }
     else {
-      ctx.fillStyle = "hsl("+cell.color+", 50%, 40%)";
+      if (cell.age < 20) {
+        var lum = 80 - cell.age*2; 
+      }
+      else {
+        var lum = 40; 
+      }
+      ctx.fillStyle = "hsl("+cell.color+", 50%, "+lum+"%)";
     }
 
     // Now instead of just going from the origin, we have to convert

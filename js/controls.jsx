@@ -4,6 +4,24 @@ var runner = require("./runner");
 var render = require("./render");
 
 var Left = React.createClass({
+  getInitialState: function() {
+    return ({
+      population: 0
+    });
+  },
+  updatePopulation: function(data) {
+    this.setState({
+      population: data.population
+    });
+  },
+  componentWillMount: function() {
+  },
+  componentDidMount: function() {
+    var self = this;
+    runner.on("end tick", function(data) {
+      self.updatePopulation(data);
+    });
+  },
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
@@ -31,6 +49,9 @@ var Left = React.createClass({
             >Start/Stop</div>
         </div>
 
+        <h2 className="mfb">Statistics</h2>
+        <p className="mfb">Population: <span>{this.state.population}</span></p>
+
         <h2 className="mfb">Introduce AIs</h2>
 
         <div 
@@ -38,17 +59,6 @@ var Left = React.createClass({
           className="butn"
           >Rando</div>
 
-        <p className="mfx mfb small">Rando is dumb as a sack of bricks. source code.</p>
-
-        <div 
-          onClick={this.introduce}
-          className="butn"
-          >Speeder - always moving</div>
-
-        <div 
-          onClick={this.introduce}
-          className="butn"
-          >Testudo - reinforced</div>
       </div>
     );
   }
