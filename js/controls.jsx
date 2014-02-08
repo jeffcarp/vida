@@ -5,18 +5,7 @@ var render = require("./render");
 
 var Left = React.createClass({
   setZoom: function(direction) {
-    if (direction === "out") {
-      render.zoomOut();
-    }
-    else {
-      render.zoomIn();
-    }
-  },
-  introduce: function() {
-    runner.introduce();    
-  },
-  centerCells: function() {
-    render.centerCells();    
+    direction === "out" ? render.zoomOut() : render.zoomIn();
   },
   render: function() {
     return (
@@ -38,14 +27,14 @@ var Left = React.createClass({
             >Zoom In</div>
           <div 
             className="butn"
-            onClick={this.centerCells}
-            >Center</div>
+            onClick={runner.toggleStartStop}
+            >Start/Stop</div>
         </div>
 
         <h2 className="mfb">Introduce AIs</h2>
 
         <div 
-          onClick={this.introduce}
+          onClick={runner.introduce}
           className="butn"
           >Rando</div>
 

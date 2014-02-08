@@ -65,18 +65,7 @@ var render = require("./render");
 
 var Left = React.createClass({displayName: 'Left',
   setZoom: function(direction) {
-    if (direction === "out") {
-      render.zoomOut();
-    }
-    else {
-      render.zoomIn();
-    }
-  },
-  introduce: function() {
-    runner.introduce();    
-  },
-  centerCells: function() {
-    render.centerCells();    
+    direction === "out" ? render.zoomOut() : render.zoomIn();
   },
   render: function() {
     return (
@@ -98,14 +87,14 @@ var Left = React.createClass({displayName: 'Left',
             , "Zoom In"),
           React.DOM.div( 
             {className:"butn",
-            onClick:this.centerCells}
-            , "Center")
+            onClick:runner.toggleStartStop}
+            , "Start/Stop")
         ),
 
         React.DOM.h2( {className:"mfb"}, "Introduce AIs"),
 
         React.DOM.div( 
-          {onClick:this.introduce,
+          {onClick:runner.introduce,
           className:"butn"}
           , "Rando"),
 
@@ -378,12 +367,38 @@ var game = {
   time: 0
 };
 var config = {};
+var _interval;
+
+// TEST
+// The slowest function by far is cellExists(),
+// because it does an O(n) traversal at least once
+// per tick. Testing to see if I can speed it up by
+// using an adjacency list.
+var adjacency = {};
+
+_addAdj = function(x, y) {
+  if (!(x in adjacency)) adjacency[x] = [];
+  if (adjacency[x].indexOf(y) < 0) {
+    adjacency[x].push(y);
+  }
+};
+
+_removeAdj = function(x, y) {
+  if (x in adjacency && adjacency[x].length) {
+    var i = adjacency[x].indexOf(y);
+    if (i != -1) adjacency[x].splice(i, 1);
+  }
+};
+
+_existsAdj = function(x, y) {
+  return x in adjacency && adjacency[x].indexOf(y) != -1;
+};
+
 
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
   runner.generateCells();
-  runner.generateFood();
 
   // Hack to wait for DOM to load
   window.setTimeout(function() {
@@ -391,9 +406,21 @@ runner.init = function(userConfig) {
     render.init(config);
   }, 75);
 
-  window.setInterval(function() {
+  runner.start();
+};
+
+runner.toggleStartStop = function() {
+  _interval ? runner.stop() : runner.start();
+};
+
+runner.start = function() {
+  _interval = window.setInterval(function() {
     runner.tickAllCells();
   }, config.speed);
+};
+
+runner.stop = function() {
+  _interval = window.clearInterval(_interval);
 };
 
 // Returns a clean slate of cells
@@ -404,18 +431,6 @@ runner.generateCells = function() {
       x: aux.rand(num*4)-num*2, 
       y: aux.rand(num*4)-num*2,
       ai: "protoai"
-    });
-  }
-};
-
-runner.generateFood = function() {
-  var cells = [];
-  for (var i=0; i<5; i++) {
-    runner.createCell({
-      x: aux.rand(50)-25, 
-      y: aux.rand(50)-25,
-      type: "food",
-      ai: "food"
     });
   }
 };
@@ -432,6 +447,7 @@ runner.createCell = function(options) {
     type: options.type || "cell",
     color: !isNaN(options.color) ? options.color+10 : 0 
   });
+  _addAdj(options.x, options.y);
 };
 
 runner.defaultConfig = function(userConfig) {
@@ -497,7 +513,7 @@ runner.tickAllCells = function() {
 
     // Cell wants to reproduce
     // TEMPORARILY CAP CELL GROWTH
-    if (move[0] === 2 && move[1] === 2 && game.cells.length < 200) { 
+    if (move[0] === 2 && move[1] === 2 && game.cells.length < 1000) { 
       if (runner.vacant(cell.x+1, cell.y)) {
 
         // TODO: Introduce genetic mutation here
@@ -523,8 +539,7 @@ runner.tickAllCells = function() {
 
       // TODO: If valid
       if (!runner.cellExists(desiredX, desiredY)) {
-        cell.x = desiredX;
-        cell.y = desiredY;
+        runner.move(cell, desiredX, desiredY);
       }
     }
     
@@ -534,15 +549,26 @@ runner.tickAllCells = function() {
 
 };
 
+runner.move = function(cell, x, y) {
+  _removeAdj(cell.x, cell.y);
+  _addAdj(x, y);
+  cell.x = x;
+  cell.y = y;
+};
+
 runner.removeCell = function(cell) {
+  _removeAdj(cell.x, cell.y);
   var i = game.cells.indexOf(cell);
   if (i != -1) game.cells.splice(i, 1);
 };
 
 runner.cellExists = function(x, y) {
+  return _existsAdj(x, y);
+  /*
   return game.cells.some(function(c) {
     return c.x == x && c.y == y;
   });
+  */
 };
 
 runner.vacant = function(x, y) {
