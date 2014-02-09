@@ -16,7 +16,7 @@ var protoai = {};
 var cellutil = require("./util");
 var aux = require("../helpers");
 
-protoai.passEnergy = 40;
+protoai.passEnergy = 250;
 
 var closestNeighbor = function(cell, neighborhood) {
   var closest = null;
@@ -25,8 +25,8 @@ var closestNeighbor = function(cell, neighborhood) {
     for (var j in neighborhood[i]) {
       var c = neighborhood[i][j];
       var dist = distanceTo(c, cell);
-      if (dist < closestDist && !related(cell, c)) {
-        closest = neighborhood[i][j];
+      if (dist < closestDist && notRelated(cell, c)) {
+        closest = c;
         closestDist = dist;
       }
     } 
@@ -34,13 +34,25 @@ var closestNeighbor = function(cell, neighborhood) {
   return closest;
 };
 
-var related = function(a, b) {
-  return a.parent !== b.id && b.parent !== a.id;
+var notRelated = function(a, b) {
+  return (
+    a && b
+    && a.parent !== b.id 
+    && b.parent !== a.id 
+    && b.parent !== a.parent 
+    && a.id !== b.id
+  );
 };
 
-var vacantSpot = function(cell) {
+var vacantSpot = function(target) {
   // TODO: Return best spot
-  return [cell.x+1, cell.y];
+/*
+  var vec = [0, 0];
+  var i = aux.rand(2);
+  if (aux.rand(2) === 1) vec[i] = 1; 
+  else vec[i] = -1;
+*/
+  return [target.x+1, target.y];
 };
 
 var at = function(x, y, neighborhood) {
@@ -49,9 +61,10 @@ var at = function(x, y, neighborhood) {
 };
 
 var vectorToward = function(x, y, cell) {
+  
   var dx = 0,
       dy = 0;
-  if (cell.x !== x) {
+  if (cell.age % 2 == 0) {
     if (x > cell.x) dx = 1; 
     if (x < cell.x) dx = -1; 
     return [dx, 0];
@@ -81,7 +94,7 @@ var vnn = function(cell, neighborhood) {
 protoai.tick = function(cell, neighborhood, messages, time) {
 
   // Composable block
-  if (cell.age > 100 && cell.age % 25 == 0 && cell.energy > (protoai.passEnergy*2)) {
+  if (cell.age > 100 && cell.age % 25 == 0 && cell.energy > protoai.passEnergy) {
     return [2, 2]; // Reproduce
   }
 
@@ -94,13 +107,13 @@ protoai.tick = function(cell, neighborhood, messages, time) {
     for (var dir in soba) {
       var adj = soba[dir];
       // No cannibalism please
-      if (adj && adj.id !== cell.id && !related(cell, adj)) {
+      if (adj && notRelated(cell, adj)) {
         // TODO: Distance to prey should be enforced in runner
-        if (distanceTo(cell, adj) === 1) { 
+        if (distanceTo(cell, adj) < 3) { 
+          console.log("attempt to eat", adj);
           return ({
             type: "eat",
-            x: adj.x,
-            y: adj.y
+            target: adj
           });
         }
       }
@@ -195,6 +208,12 @@ var Left = React.createClass({displayName: 'Left',
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
+  introduceRando: function() {
+    runner.introduce("protoai");
+  },
+  introduceFood: function() {
+    runner.introduce("food");
+  },
   render: function() {
     var ratio = (this.state.totalEnergy / this.state.population).toFixed(2);
     return (
@@ -228,12 +247,12 @@ var Left = React.createClass({displayName: 'Left',
         React.DOM.h2( {className:"mfb"}, "Introduce AIs"),
 
         React.DOM.div( 
-          {onClick:runner.introduce,
+          {onClick:this.introduceRando,
           className:"butn"}
-          , "Rando"),
+          , "ProtoAI"),
 
         React.DOM.div( 
-          {onClick:runner.introduce.bind(null, "food"),
+          {onClick:this.introduceFood,
           className:"butn"}
           , "Food")
 
@@ -250,6 +269,7 @@ React.renderComponent(
 },{"./render":9,"./runner":10}],6:[function(require,module,exports){
 var aux = {};
 
+// num is EXCLUSIVE
 aux.rand = function(num) {
   return Math.floor(Math.random()*num);
 };
@@ -264,7 +284,7 @@ var blockSize = 4;
 var config = {
   mapSize: mapSize/blockSize, 
   blockSize: blockSize,
-  speed: 300 
+  speed: 400 
 };
 
 var runner = (require("./runner")).init(config);
@@ -582,7 +602,7 @@ runner.createCell = function(options) {
     y: options.y,
     age: 0,
     id: _baseID,
-    energy: !isNaN(options.energy) ? options.energy : 300,
+    energy: !isNaN(options.energy) ? options.energy : 500,
     parent: !isNaN(options.parent) ? options.parent : 100,
     ai: options.ai,
     type: options.type || "cell",
@@ -608,8 +628,8 @@ runner.defaultConfig = function(userConfig) {
 
 // Right now this introduces a bunch of randos
 // around a random spawn near the origin
-runner.introduce = function(ai) {
-  ai = ai || "protoai";
+runner.introduce = function(specialAI) {
+  specialAI = specialAI || "protoai";
   var num = 20;
   var origin = 50;
   var xOff = aux.rand(origin) - origin/2;
@@ -619,7 +639,7 @@ runner.introduce = function(ai) {
     var newCell = runner.createCell({
       x: aux.rand(num*4)-num*2 + xOff, 
       y: aux.rand(num*4)-num*2 + yOff,
-      ai: "protoai",
+      ai: specialAI,
       parent: parentID
     });
     if (i === 0) parentID = newCell.id;
@@ -636,7 +656,9 @@ runner.tickAllCells = function() {
   game.time += 1;
 
   // For each cell
-  game.cells.forEach(function(cell) {
+  for (var cellIndex in game.cells) {
+    var cell = game.cells[cellIndex];
+//  game.cells.forEach(function(cell) {
 
     // See if there are any messages
     cell.age += 1;
@@ -666,12 +688,15 @@ runner.tickAllCells = function() {
     var passE = ais[cell.ai].passEnergy;
 
     if (typeof move == "object" && "type" in move && move.type === "eat") {
-      var target = runner.cellAt(move.x, move.y);
-      var dist = Math.abs(move.x - cell.x) + Math.abs(move.y - cell.y);
-      if (target && dist < 3) {
-        cell.energy += target.energy;
-        return runner.removeCell(target)
-        // I guess that could be it?
+      var target = move.target;
+      console.log("target", target);
+      if (target) {
+        var dist = Math.abs(target.x - cell.x) + Math.abs(target.y - cell.y);
+        if (dist < 5) {
+          console.log("actually remove");
+          cell.energy += target.energy;
+          return runner.removeCell(target)
+        }
       }
     }
     else if (move[0] === 2 && move[1] === 2 && cell.energy > passE) {
@@ -708,7 +733,7 @@ runner.tickAllCells = function() {
       }
     }
     
-  });
+  };
 
   render.setVars(game, config);
 
@@ -772,9 +797,12 @@ runner.move = function(cell, x, y) {
 };
 
 runner.removeCell = function(cell) {
+  console.log("should not be null", runner.cellAt(cell.x, cell.y));
   _removeAdj(cell.x, cell.y);
   var i = game.cells.indexOf(cell);
+  console.log("i", i);
   if (i != -1) game.cells.splice(i, 1);
+  console.log("should be null", runner.cellAt(cell.x, cell.y));
 };
 
 runner.cellExists = function(x, y) {

@@ -3,7 +3,7 @@ var protoai = {};
 var cellutil = require("./util");
 var aux = require("../helpers");
 
-protoai.passEnergy = 40;
+protoai.passEnergy = 250;
 
 var closestNeighbor = function(cell, neighborhood) {
   var closest = null;
@@ -12,8 +12,8 @@ var closestNeighbor = function(cell, neighborhood) {
     for (var j in neighborhood[i]) {
       var c = neighborhood[i][j];
       var dist = distanceTo(c, cell);
-      if (dist < closestDist && !related(cell, c)) {
-        closest = neighborhood[i][j];
+      if (dist < closestDist && notRelated(cell, c)) {
+        closest = c;
         closestDist = dist;
       }
     } 
@@ -21,13 +21,25 @@ var closestNeighbor = function(cell, neighborhood) {
   return closest;
 };
 
-var related = function(a, b) {
-  return a.parent !== b.id && b.parent !== a.id;
+var notRelated = function(a, b) {
+  return (
+    a && b
+    && a.parent !== b.id 
+    && b.parent !== a.id 
+    && b.parent !== a.parent 
+    && a.id !== b.id
+  );
 };
 
-var vacantSpot = function(cell) {
+var vacantSpot = function(target) {
   // TODO: Return best spot
-  return [cell.x+1, cell.y];
+/*
+  var vec = [0, 0];
+  var i = aux.rand(2);
+  if (aux.rand(2) === 1) vec[i] = 1; 
+  else vec[i] = -1;
+*/
+  return [target.x+1, target.y];
 };
 
 var at = function(x, y, neighborhood) {
@@ -36,9 +48,10 @@ var at = function(x, y, neighborhood) {
 };
 
 var vectorToward = function(x, y, cell) {
+  
   var dx = 0,
       dy = 0;
-  if (cell.x !== x) {
+  if (cell.age % 2 == 0) {
     if (x > cell.x) dx = 1; 
     if (x < cell.x) dx = -1; 
     return [dx, 0];
@@ -68,7 +81,7 @@ var vnn = function(cell, neighborhood) {
 protoai.tick = function(cell, neighborhood, messages, time) {
 
   // Composable block
-  if (cell.age > 100 && cell.age % 25 == 0 && cell.energy > (protoai.passEnergy*2)) {
+  if (cell.age > 100 && cell.age % 25 == 0 && cell.energy > protoai.passEnergy) {
     return [2, 2]; // Reproduce
   }
 
@@ -81,13 +94,13 @@ protoai.tick = function(cell, neighborhood, messages, time) {
     for (var dir in soba) {
       var adj = soba[dir];
       // No cannibalism please
-      if (adj && adj.id !== cell.id && !related(cell, adj)) {
+      if (adj && notRelated(cell, adj)) {
         // TODO: Distance to prey should be enforced in runner
-        if (distanceTo(cell, adj) === 1) { 
+        if (distanceTo(cell, adj) < 3) { 
+          console.log("attempt to eat", adj);
           return ({
             type: "eat",
-            x: adj.x,
-            y: adj.y
+            target: adj
           });
         }
       }

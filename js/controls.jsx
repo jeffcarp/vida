@@ -45,6 +45,12 @@ var Left = React.createClass({
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
+  introduceRando: function() {
+    runner.introduce("protoai");
+  },
+  introduceFood: function() {
+    runner.introduce("food");
+  },
   render: function() {
     var ratio = (this.state.totalEnergy / this.state.population).toFixed(2);
     return (
@@ -78,12 +84,12 @@ var Left = React.createClass({
         <h2 className="mfb">Introduce AIs</h2>
 
         <div 
-          onClick={runner.introduce}
+          onClick={this.introduceRando}
           className="butn"
-          >Rando</div>
+          >ProtoAI</div>
 
         <div 
-          onClick={runner.introduce.bind(null, "food")}
+          onClick={this.introduceFood}
           className="butn"
           >Food</div>
 

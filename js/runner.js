@@ -96,7 +96,7 @@ runner.createCell = function(options) {
     y: options.y,
     age: 0,
     id: _baseID,
-    energy: !isNaN(options.energy) ? options.energy : 300,
+    energy: !isNaN(options.energy) ? options.energy : 500,
     parent: !isNaN(options.parent) ? options.parent : 100,
     ai: options.ai,
     type: options.type || "cell",
@@ -122,8 +122,8 @@ runner.defaultConfig = function(userConfig) {
 
 // Right now this introduces a bunch of randos
 // around a random spawn near the origin
-runner.introduce = function(ai) {
-  ai = ai || "protoai";
+runner.introduce = function(specialAI) {
+  specialAI = specialAI || "protoai";
   var num = 20;
   var origin = 50;
   var xOff = aux.rand(origin) - origin/2;
@@ -133,7 +133,7 @@ runner.introduce = function(ai) {
     var newCell = runner.createCell({
       x: aux.rand(num*4)-num*2 + xOff, 
       y: aux.rand(num*4)-num*2 + yOff,
-      ai: "protoai",
+      ai: specialAI,
       parent: parentID
     });
     if (i === 0) parentID = newCell.id;
@@ -150,7 +150,9 @@ runner.tickAllCells = function() {
   game.time += 1;
 
   // For each cell
-  game.cells.forEach(function(cell) {
+  for (var cellIndex in game.cells) {
+    var cell = game.cells[cellIndex];
+//  game.cells.forEach(function(cell) {
 
     // See if there are any messages
     cell.age += 1;
@@ -180,12 +182,15 @@ runner.tickAllCells = function() {
     var passE = ais[cell.ai].passEnergy;
 
     if (typeof move == "object" && "type" in move && move.type === "eat") {
-      var target = runner.cellAt(move.x, move.y);
-      var dist = Math.abs(move.x - cell.x) + Math.abs(move.y - cell.y);
-      if (target && dist < 3) {
-        cell.energy += target.energy;
-        return runner.removeCell(target)
-        // I guess that could be it?
+      var target = move.target;
+      console.log("target", target);
+      if (target) {
+        var dist = Math.abs(target.x - cell.x) + Math.abs(target.y - cell.y);
+        if (dist < 5) {
+          console.log("actually remove");
+          cell.energy += target.energy;
+          return runner.removeCell(target)
+        }
       }
     }
     else if (move[0] === 2 && move[1] === 2 && cell.energy > passE) {
@@ -222,7 +227,7 @@ runner.tickAllCells = function() {
       }
     }
     
-  });
+  };
 
   render.setVars(game, config);
 
@@ -286,9 +291,12 @@ runner.move = function(cell, x, y) {
 };
 
 runner.removeCell = function(cell) {
+  console.log("should not be null", runner.cellAt(cell.x, cell.y));
   _removeAdj(cell.x, cell.y);
   var i = game.cells.indexOf(cell);
+  console.log("i", i);
   if (i != -1) game.cells.splice(i, 1);
+  console.log("should be null", runner.cellAt(cell.x, cell.y));
 };
 
 runner.cellExists = function(x, y) {
