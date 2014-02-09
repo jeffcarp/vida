@@ -82,9 +82,16 @@ The object of the game is to capture all your opponents pieces. Just like in Go,
 
 - How do we manage the boundaries of the map? Do they roll over or are they fixed?
 
+## Inspiration
+
+- Prey - Michael Crichton
+- The game of Go
+- Conway's game of life
+- Avida - Ofria, Bryson 
+- [Tierra](http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/areas/alife/systems/tierra/0.html) - Tom Ray (1992)
+
 ## Resources
 
 - [Von Neumann neighborhood](http://en.wikipedia.org/wiki/Von_Neumann_neighborhood)
 - [Manhattan Distance](http://en.wiktionary.org/wiki/Manhattan_distance) 
 - [Von Neumann cellular automation](http://en.wikipedia.org/wiki/Von_Neumann_cellular_automata)
-- [Tierra, Evolution of Digital Organisms, Tom Ray 1992](http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/areas/alife/systems/tierra/0.html)
