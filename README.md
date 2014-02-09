@@ -87,3 +87,4 @@ The object of the game is to capture all your opponents pieces. Just like in Go,
 - [Von Neumann neighborhood](http://en.wikipedia.org/wiki/Von_Neumann_neighborhood)
 - [Manhattan Distance](http://en.wiktionary.org/wiki/Manhattan_distance) 
 - [Von Neumann cellular automation](http://en.wikipedia.org/wiki/Von_Neumann_cellular_automata)
+- [Tierra, Evolution of Digital Organisms, Tom Ray 1992](http://www.cs.cmu.edu/afs/cs/project/ai-repository/ai/areas/alife/systems/tierra/0.html)
