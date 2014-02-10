@@ -3,29 +3,56 @@
 var runner = require("./runner");
 var render = require("./render");
 
+var StartStop = React.createClass({
+  render: function() {
+    var text = this.props.running ? "Stop" : "Start";
+    return (
+      <div 
+        className="butn"
+        onClick={this.props.action}
+        >{text}</div>
+    );
+  }
+});
+
 var Left = React.createClass({
   getInitialState: function() {
     return ({
-      population: 0
+      population: 0,
+      totalEnergy: 0,
+      gameRunning: false
     });
   },
   updatePopulation: function(data) {
     this.setState({
-      population: data.population
+      population: data.population,
+      totalEnergy: data.totalEnergy
     });
-  },
-  componentWillMount: function() {
   },
   componentDidMount: function() {
     var self = this;
+    runner.on("game start", function() {
+      self.setState({gameRunning: true});
+    });
+    runner.on("game stop", function() {
+      self.setState({gameRunning: false});
+    });
     runner.on("end tick", function(data) {
       self.updatePopulation(data);
+      if (!self.state.gameRunning) self.setState({gameRunning: true});
     });
   },
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
+  introduceRando: function() {
+    runner.introduce("protoai");
+  },
+  introduceFood: function() {
+    runner.introduce("food");
+  },
   render: function() {
+    var ratio = (this.state.totalEnergy / this.state.population).toFixed(2);
     return (
       <div id="left">
         <div className="mfb">
@@ -43,21 +70,28 @@ var Left = React.createClass({
             className="butn"
             onClick={this.setZoom.bind(null, "in")}
             >Zoom In</div>
-          <div 
-            className="butn"
-            onClick={runner.toggleStartStop}
-            >Start/Stop</div>
+          <StartStop
+            action={runner.toggleStartStop}
+            running={this.state.gameRunning}
+            />
         </div>
 
         <h2 className="mfb">Statistics</h2>
         <p className="mfb">Population: <span>{this.state.population}</span></p>
+        <p className="mfb">Total energy: <span>{this.state.totalEnergy}</span></p>
+        <p className="mfb">Ratio: <span>{ratio}</span></p>
 
         <h2 className="mfb">Introduce AIs</h2>
 
         <div 
-          onClick={runner.introduce}
+          onClick={this.introduceRando}
           className="butn"
-          >Rando</div>
+          >ProtoAI</div>
+
+        <div 
+          onClick={this.introduceFood}
+          className="butn"
+          >Food</div>
 
       </div>
     );

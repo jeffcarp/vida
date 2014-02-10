@@ -5,11 +5,6 @@ var cellutil = require("./util");
 var aux = require("../helpers");
 
 food.tick = function(cell, neighborhood, messages, time) {
-
-  if (cell.age > 20 && aux.rand(18) === 1) {
-    return [2, 2]; // Reproduce
-  }
-
   return cellutil.randDir();
 };
 
@@ -21,10 +16,118 @@ var protoai = {};
 var cellutil = require("./util");
 var aux = require("../helpers");
 
+protoai.passEnergy = 250;
+
+var closestNeighbor = function(cell, neighborhood) {
+  var closest = null;
+  var closestDist = 1e6;
+  for (var i in neighborhood) {
+    for (var j in neighborhood[i]) {
+      var c = neighborhood[i][j];
+      var dist = distanceTo(c, cell);
+      if (dist < closestDist && notRelated(cell, c)) {
+        closest = c;
+        closestDist = dist;
+      }
+    } 
+  } 
+  return closest;
+};
+
+var notRelated = function(a, b) {
+  return (
+    a && b
+    && a.parent !== b.id 
+    && b.parent !== a.id 
+    && b.parent !== a.parent 
+    && a.id !== b.id
+  );
+};
+
+var vacantSpot = function(target) {
+  // TODO: Return best spot
+/*
+  var vec = [0, 0];
+  var i = aux.rand(2);
+  if (aux.rand(2) === 1) vec[i] = 1; 
+  else vec[i] = -1;
+*/
+  return [target.x+1, target.y];
+};
+
+var at = function(x, y, neighborhood) {
+  if (x in neighborhood && y in neighborhood[x]) return neighborhood[x][y];
+  else return null;
+};
+
+var vectorToward = function(x, y, cell) {
+  
+  var dx = 0,
+      dy = 0;
+  if (cell.age % 2 == 0) {
+    if (x > cell.x) dx = 1; 
+    if (x < cell.x) dx = -1; 
+    return [dx, 0];
+  }
+  else {
+    if (y > cell.y) dy = 1; 
+    if (y < cell.y) dy = -1; 
+    return [0, dy];
+  }
+};
+
+var distanceTo = function(to, from) {
+  var x = to.x - from.x;
+  var y = to.y - from.y;
+  return Math.abs(x) + Math.abs(y);
+};
+
+var vnn = function(cell, neighborhood) {
+  return {
+    left: at(cell.x-1, cell.y, neighborhood),
+    right: at(cell.x+1, cell.y, neighborhood),
+    up: at(cell.x, cell.y-1, neighborhood),
+    down: at(cell.x, cell.y+1, neighborhood)
+  };
+};
+
 protoai.tick = function(cell, neighborhood, messages, time) {
 
-  if (cell.age > 20 && aux.rand(25) === 1) {
+  // Composable block
+  if (cell.age > 100 && cell.age % 25 == 0 && cell.energy > protoai.passEnergy) {
     return [2, 2]; // Reproduce
+  }
+
+  // Composable block
+  if (1 == 1) {
+  
+    // If another cell is already in our VN neighborhood, EAT IT (unless it's our child)
+    // Grab cells in von neumann neighborhood
+    var soba = vnn(cell, neighborhood);
+    for (var dir in soba) {
+      var adj = soba[dir];
+      // No cannibalism please
+      if (adj && notRelated(cell, adj)) {
+        // TODO: Distance to prey should be enforced in runner
+        if (distanceTo(cell, adj) < 3) { 
+          console.log("attempt to eat", adj);
+          return ({
+            type: "eat",
+            target: adj
+          });
+        }
+      }
+    }
+
+    // Locate the closest prey cell
+    var prey = closestNeighbor(cell, neighborhood);
+    if (prey) {
+      // Locate a vacant spot in its von neumann neighborhood
+      var target = vacantSpot(prey);
+      // Return the direction that would take us closest to that cell 
+      var vec = vectorToward(target[0], target[1], cell);
+      return vec;
+    }
   }
 
   return cellutil.randDir();
@@ -63,29 +166,56 @@ module.exports = cellutil;
 var runner = require("./runner");
 var render = require("./render");
 
+var StartStop = React.createClass({displayName: 'StartStop',
+  render: function() {
+    var text = this.props.running ? "Stop" : "Start";
+    return (
+      React.DOM.div( 
+        {className:"butn",
+        onClick:this.props.action}
+        , text)
+    );
+  }
+});
+
 var Left = React.createClass({displayName: 'Left',
   getInitialState: function() {
     return ({
-      population: 0
+      population: 0,
+      totalEnergy: 0,
+      gameRunning: false
     });
   },
   updatePopulation: function(data) {
     this.setState({
-      population: data.population
+      population: data.population,
+      totalEnergy: data.totalEnergy
     });
-  },
-  componentWillMount: function() {
   },
   componentDidMount: function() {
     var self = this;
+    runner.on("game start", function() {
+      self.setState({gameRunning: true});
+    });
+    runner.on("game stop", function() {
+      self.setState({gameRunning: false});
+    });
     runner.on("end tick", function(data) {
       self.updatePopulation(data);
+      if (!self.state.gameRunning) self.setState({gameRunning: true});
     });
   },
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
+  introduceRando: function() {
+    runner.introduce("protoai");
+  },
+  introduceFood: function() {
+    runner.introduce("food");
+  },
   render: function() {
+    var ratio = (this.state.totalEnergy / this.state.population).toFixed(2);
     return (
       React.DOM.div( {id:"left"}, 
         React.DOM.div( {className:"mfb"}, 
@@ -103,21 +233,28 @@ var Left = React.createClass({displayName: 'Left',
             {className:"butn",
             onClick:this.setZoom.bind(null, "in")}
             , "Zoom In"),
-          React.DOM.div( 
-            {className:"butn",
-            onClick:runner.toggleStartStop}
-            , "Start/Stop")
+          StartStop(
+            {action:runner.toggleStartStop,
+            running:this.state.gameRunning}
+            )
         ),
 
         React.DOM.h2( {className:"mfb"}, "Statistics"),
         React.DOM.p( {className:"mfb"}, "Population: ", React.DOM.span(null, this.state.population)),
+        React.DOM.p( {className:"mfb"}, "Total energy: ", React.DOM.span(null, this.state.totalEnergy)),
+        React.DOM.p( {className:"mfb"}, "Ratio: ", React.DOM.span(null, ratio)),
 
         React.DOM.h2( {className:"mfb"}, "Introduce AIs"),
 
         React.DOM.div( 
-          {onClick:runner.introduce,
+          {onClick:this.introduceRando,
           className:"butn"}
-          , "Rando")
+          , "ProtoAI"),
+
+        React.DOM.div( 
+          {onClick:this.introduceFood,
+          className:"butn"}
+          , "Food")
 
       )
     );
@@ -132,6 +269,7 @@ React.renderComponent(
 },{"./render":9,"./runner":10}],6:[function(require,module,exports){
 var aux = {};
 
+// num is EXCLUSIVE
 aux.rand = function(num) {
   return Math.floor(Math.random()*num);
 };
@@ -146,7 +284,7 @@ var blockSize = 4;
 var config = {
   mapSize: mapSize/blockSize, 
   blockSize: blockSize,
-  speed: 50 
+  speed: 400 
 };
 
 var runner = (require("./runner")).init(config);
@@ -385,6 +523,7 @@ var game = {
 };
 var config = {};
 var _interval;
+var _baseID = 0;
 
 // TEST
 // The slowest function by far is cellExists(),
@@ -393,29 +532,29 @@ var _interval;
 // using an adjacency list.
 var adjacency = {};
 
-_addAdj = function(x, y) {
-  if (!(x in adjacency)) adjacency[x] = [];
-  if (adjacency[x].indexOf(y) < 0) {
-    adjacency[x].push(y);
+_addAdj = function(cell) {
+  if (isNaN(cell.x) || isNaN(cell.y)) return;
+  if (!(cell.x in adjacency)) adjacency[cell.x] = {};
+  if (!(cell.y in adjacency[cell.x])) {
+    adjacency[cell.x][cell.y] = cell;
   }
 };
 
 _removeAdj = function(x, y) {
-  if (x in adjacency && adjacency[x].length) {
-    var i = adjacency[x].indexOf(y);
-    if (i != -1) adjacency[x].splice(i, 1);
-  }
+  var cell = _atAdj(x, y);
+  if (cell) delete adjacency[x][y];
 };
 
-_existsAdj = function(x, y) {
-  return x in adjacency && adjacency[x].indexOf(y) != -1;
+_atAdj = function(x, y) {
+  if (x in adjacency && y in adjacency[x]) return adjacency[x][y];
+  else return null;
 };
-
 
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
-  runner.generateCells();
+  //runner.generateCells();
+  //runner.introduce();
 
   // Hack to wait for DOM to load
   window.setTimeout(function() {
@@ -423,7 +562,7 @@ runner.init = function(userConfig) {
     render.init(config);
   }, 75);
 
-  runner.start();
+  //runner.start();
 };
 
 runner.toggleStartStop = function() {
@@ -431,18 +570,20 @@ runner.toggleStartStop = function() {
 };
 
 runner.start = function() {
+  runner.emit("game start");
   _interval = window.setInterval(function() {
     runner.tickAllCells();
   }, config.speed);
 };
 
 runner.stop = function() {
+  runner.emit("game stop");
   _interval = window.clearInterval(_interval);
 };
 
 // Returns a clean slate of cells
 runner.generateCells = function() {
-  var num = 50;
+  var num = 20;
   for (var i=0; i<num; i++) {
     runner.createCell({
       x: aux.rand(num*4)-num*2, 
@@ -456,15 +597,21 @@ runner.createCell = function(options) {
   if (isNaN(options.x)) return; 
   if (isNaN(options.y)) return; 
   if (!ais[options.ai]) return;
-  game.cells.push({
+  var cell = {
     x: options.x,
     y: options.y,
     age: 0,
+    id: _baseID,
+    energy: !isNaN(options.energy) ? options.energy : 500,
+    parent: !isNaN(options.parent) ? options.parent : 100,
     ai: options.ai,
     type: options.type || "cell",
     color: !isNaN(options.color) ? options.color+10 : 0 
-  });
-  _addAdj(options.x, options.y);
+  };
+  game.cells.push(cell);
+  _addAdj(cell);
+  _baseID += 1;
+  return cell;
 };
 
 runner.defaultConfig = function(userConfig) {
@@ -481,38 +628,50 @@ runner.defaultConfig = function(userConfig) {
 
 // Right now this introduces a bunch of randos
 // around a random spawn near the origin
-runner.introduce = function() {
+runner.introduce = function(specialAI) {
+  specialAI = specialAI || "protoai";
   var num = 20;
-  var origin = 500;
+  var origin = 50;
   var xOff = aux.rand(origin) - origin/2;
   var yOff = aux.rand(origin) - origin/2;
+  var parentID = null;
   for (var i=0; i<num; i++) {
-    runner.createCell({
+    var newCell = runner.createCell({
       x: aux.rand(num*4)-num*2 + xOff, 
       y: aux.rand(num*4)-num*2 + yOff,
-      ai: "protoai"
+      ai: specialAI,
+      parent: parentID
     });
+    if (i === 0) parentID = newCell.id;
   }
 };
 runner.tickAllCells = function() {
 
+/*
+  if (game.time % 30 == 0) {
+    runner.introduce();
+  }
+*/
+
   game.time += 1;
 
   // For each cell
-  game.cells.forEach(function(cell) {
+  for (var cellIndex in game.cells) {
+    var cell = game.cells[cellIndex];
+//  game.cells.forEach(function(cell) {
 
     // See if there are any messages
     cell.age += 1;
+    cell.energy -= 1; // Living takes energy, man
 
-    // Cells die of old age
-    if (cell.age > 30) {
-      var death = aux.rand(100 - cell.age);
-      if (death < 2) {
-        runner.removeCell(cell);
-      }
+    // Cells die by running out of energy 
+    if (cell.energy <= 0) {
+      return runner.removeCell(cell);
     }
 
     // Cells die of overcrowding
+// Note: we were calculating atari incorrectly, causing a lot of cells to die
+/*
     var dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
     var atari = dirs.some(function(d) {
       return runner.vacant(cell.x+d[0], cell.y+d[1]);
@@ -520,17 +679,28 @@ runner.tickAllCells = function() {
     if (!atari) {
       runner.removeCell(cell);
     }
+*/
 
-    // Get its desired move
-    // TODO: Pass in neighborhood
-    // TODO: Pass in messages
-    var neighborhood = {}; 
-    var messages = []; 
+    var neighborhood = runner.neighborhoodFor(cell, 40);
+    var messages = []; // TODO: Pass in messages
     var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
-    // Cell wants to reproduce
-    // TEMPORARILY CAP CELL GROWTH
-    if (move[0] === 2 && move[1] === 2) { // && game.cells.length < 1000) { Danger zone
+    var passE = ais[cell.ai].passEnergy;
+
+    if (typeof move == "object" && "type" in move && move.type === "eat") {
+      var target = move.target;
+      console.log("target", target);
+      if (target) {
+        var dist = Math.abs(target.x - cell.x) + Math.abs(target.y - cell.y);
+        if (dist < 5) {
+          console.log("actually remove");
+          cell.energy += target.energy;
+          return runner.removeCell(target)
+        }
+      }
+    }
+    else if (move[0] === 2 && move[1] === 2 && cell.energy > passE) {
+      // Cell wants to reproduce
       if (runner.vacant(cell.x+1, cell.y)) {
 
         // TODO: Introduce genetic mutation here
@@ -538,12 +708,14 @@ runner.tickAllCells = function() {
         runner.createCell({
           x: cell.x+1, 
           y: cell.y,
+          energy: passE,
           ai: cell.ai,
           type: cell.type,
-          color: cell.color
+          color: cell.color,
+          parent: cell.id
         });
 
-        //cell.age = 60;
+        cell.energy -= passE;
       
       }
     }
@@ -557,16 +729,43 @@ runner.tickAllCells = function() {
       // TODO: If valid
       if (!runner.cellExists(desiredX, desiredY)) {
         runner.move(cell, desiredX, desiredY);
+        cell.energy -= 1; // Costs 1 energy
       }
     }
     
-  });
+  };
 
   render.setVars(game, config);
 
   runner.emit("end tick", {
-    population: game.cells.length
+    population: game.cells.length,
+    totalEnergy: runner.totalEnergy(game.cells)
   });
+};
+
+runner.totalEnergy = function(cells) {
+  return cells.reduce(function(acc, cur) {
+    return acc + (cur.energy || 0);
+  }, 0);
+};
+
+runner.neighborhoodFor = function(cell, size) {
+  var radius = size/2,
+      startX = cell.x - radius,
+      startY = cell.y - radius,
+      endX = cell.x + radius,
+      endY = cell.y + radius,
+      neighborhood = {};
+  for (var i=startX; i<endX; i++) {
+    for (var j=startY; j<endY; j++) {
+      var p = _atAdj(i, j);
+      if (p) {
+        if (!(i in neighborhood)) neighborhood[i] = {};
+        neighborhood[i][j] = p;
+      }
+    }
+  }
+  return neighborhood;
 };
 
 runner.population = function() {
@@ -592,24 +791,26 @@ runner.on = function(action, callback) {
 
 runner.move = function(cell, x, y) {
   _removeAdj(cell.x, cell.y);
-  _addAdj(x, y);
+  _addAdj(cell);
   cell.x = x;
   cell.y = y;
 };
 
 runner.removeCell = function(cell) {
+  console.log("should not be null", runner.cellAt(cell.x, cell.y));
   _removeAdj(cell.x, cell.y);
   var i = game.cells.indexOf(cell);
+  console.log("i", i);
   if (i != -1) game.cells.splice(i, 1);
+  console.log("should be null", runner.cellAt(cell.x, cell.y));
 };
 
 runner.cellExists = function(x, y) {
-  return _existsAdj(x, y);
-  /*
-  return game.cells.some(function(c) {
-    return c.x == x && c.y == y;
-  });
-  */
+  return !!_atAdj(x, y);
+};
+
+runner.cellAt = function(x, y) {
+  return _atAdj(x, y);
 };
 
 runner.vacant = function(x, y) {
@@ -621,6 +822,8 @@ runner.validMove = function(move) {
   return (
     move
     && move.length == 2
+    && (Math.abs(move[0]) <= 1)
+    && (Math.abs(move[1]) <= 1)
     && (move[0] === 0 || move[1] === 0)
   );
 };
