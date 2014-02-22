@@ -1,2 +1,2 @@
 #!/bin/bash
-browserify js/main.js > public/bundle.js
+browserify -t reactify js/main.js > public/bundle.js

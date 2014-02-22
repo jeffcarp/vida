@@ -1,11 +1,15 @@
+var mapSize = document.getElementById("grid").width;
+var blockSize = 4;
 
 // Game params
 var config = {
-  mapSize: 100, 
-  blockSize: 4, 
-  speed: 50, 
+  mapSize: mapSize/blockSize, 
+  blockSize: blockSize,
+  speed: 200 
 };
 
 var runner = (require("./runner")).init(config);
 
+window.React = require("./react");
 
+require("./controls.jsx");
