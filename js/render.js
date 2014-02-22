@@ -159,7 +159,7 @@ render.draw = function(game, config) {
 
   cells.forEach(function(cell) {
     if (cell.ai === "food") {
-      ctx.fillStyle = "lime";
+      ctx.fillStyle = "#555";
     }
     else {
       if (cell.age < 20) {

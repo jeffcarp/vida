@@ -2,8 +2,9 @@
 var runner = {};
 
 // Dependencies
-var render = require("./render"),
-    aux = require("./helpers");
+var render = require("./render");
+var aux = require("./helpers");
+var cellutil = require("./cells/util");
 
 var ais = {
   "protoai": require("./cells/protoai"),
@@ -21,8 +22,6 @@ var _baseID = 0;
 
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
-
-  //runner.introduce();
 
   // Hack to wait for DOM to load
   window.setTimeout(function() {
@@ -52,17 +51,27 @@ runner.stop = function() {
 runner.createCell = function(options) {
   if (isNaN(options.x)) return; 
   if (isNaN(options.y)) return; 
-  if (!ais[options.ai]) return;
+  if (!(options.ai in ais)) return;
+
+  var lineage = options.lineage || [];
+
+  if (isNaN(options.color)) {
+    var color = aux.rand(256);
+  }
+  else {
+    var color = options.color;
+  }
+
   var cell = {
     x: options.x,
     y: options.y,
     age: 0,
     id: _baseID,
     energy: !isNaN(options.energy) ? options.energy : 100,
-    parent: !isNaN(options.parent) ? options.parent : 100,
+    lineage: lineage,
     ai: options.ai,
     type: options.type || "cell",
-    color: !isNaN(options.color) ? options.color+10 : 0 
+    color: color
   };
   game.cells.push(cell);
   _baseID += 1;
@@ -83,29 +92,45 @@ runner.defaultConfig = function(userConfig) {
 
 // Right now this introduces a bunch of randos
 // around a random spawn near the origin
-runner.introduce = function(specialAI) {
+runner.introduce = function(specialAI, num) {
   specialAI = specialAI || "protoai";
-  var num = 5;
-  var origin = 50;
+  num = num || 10;
+  var origin = 200;
   var xOff = aux.rand(origin) - origin/2;
   var yOff = aux.rand(origin) - origin/2;
-  var parentID = null;
+  var line = [];
+  var color;
   for (var i=0; i<num; i++) {
-    var newCell = runner.createCell({
+    var proto = {
       x: aux.rand(num*4)-num*2 + xOff, 
       y: aux.rand(num*4)-num*2 + yOff,
       ai: specialAI,
-      parent: parentID
-    });
-    if (i === 0) parentID = newCell.id;
+      lineage: line
+    };
+    if (color) proto.color = color; 
+    var newCell = runner.createCell(proto);
+    if (i === 0) {
+      line = [newCell.id];
+      color = newCell.color;
+    }
   }
 };
 
+var shuffleArray = function(array) {
+  for (var i = array.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
+}
+
 runner.tickAllCells = function() {
 
-  if (game.time % 5 == 0) {
-    runner.introduce("food");
-  } 
+  // Randomize order of array to make eating fair
+  game.cells = shuffleArray(game.cells);
+  // - I actually don't think this is necessary
 
   game.time += 1;
 
@@ -115,7 +140,12 @@ runner.tickAllCells = function() {
 
     // TODO: See if there are any messages
     cell.age += 1;
-    cell.energy -= 1; // Living takes energy, man
+    if (cell.ai === "food") {
+      cell.energy += 1; // EXPERIMENTAL photosynthesis
+    }
+    else {
+      cell.energy -= 1;
+    }
 
     // Cells die by running out of energy 
     if (cell.energy <= 0) {
@@ -123,7 +153,7 @@ runner.tickAllCells = function() {
       continue; 
     }
 
-    var neighborhood = runner.neighborhoodFor(cell, 40, game.cells);
+    var neighborhood = runner.neighborhoodFor(cell, 100, game.cells);
     var messages = []; // TODO: Pass in messages
     var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
@@ -144,16 +174,20 @@ runner.tickAllCells = function() {
       // Cell wants to reproduce
       if (runner.vacant(cell.x+1, cell.y)) {
 
+        var dir = cellutil.randDir();
+
         // TODO: Introduce genetic mutation here
         // TODO: Make reproduction take a lot of x-resources-- energy 
+        var newLineage = cell.lineage.slice();
+        newLineage.push(cell.id);
         runner.createCell({
-          x: cell.x+1, 
-          y: cell.y,
+          x: cell.x+dir[0], 
+          y: cell.y+dir[1],
           energy: passE,
           ai: cell.ai,
           type: cell.type,
-          color: cell.color,
-          parent: cell.id
+          lineage: newLineage,
+          color: cell.color 
         });
 
         cell.energy -= passE;
@@ -180,7 +214,8 @@ runner.tickAllCells = function() {
 
   runner.emit("end tick", {
     population: game.cells.length,
-    totalEnergy: runner.totalEnergy(game.cells)
+    totalEnergy: runner.totalEnergy(game.cells),
+    averageAge: runner.averageAge(game.cells)
   });
 };
 
@@ -188,6 +223,13 @@ runner.totalEnergy = function(cells) {
   return cells.reduce(function(acc, cur) {
     return acc + (cur.energy || 0);
   }, 0);
+};
+
+runner.averageAge = function(cells) {
+  var totalAge = cells.reduce(function(acc, cur) {
+    return acc + (cur.age || 0);
+  }, 0);
+  return totalAge / cells.length;
 };
 
 runner.neighborhoodFor = function(cell, size, cells) {

@@ -4,7 +4,15 @@ var food = {};
 var cellutil = require("./util");
 var aux = require("../helpers");
 
+food.reproductionRate = 30;
+food.passEnergy = 100;
+
 food.tick = function(cell, neighborhood, messages, time) {
+  // Composable block
+  if (cell.age % food.reproductionRate == 0 && cell.energy > food.passEnergy) {
+    return [2, 2]; // Reproduce
+  }
+
   return cellutil.randDir();
 };
 
@@ -16,9 +24,9 @@ var protoai = {};
 var cellutil = require("./util");
 var aux = require("../helpers");
 
-protoai.passEnergy = 40;
-protoai.reproductionRate = 5;
-protoai.childhood = 10;
+protoai.passEnergy = 100;
+protoai.reproductionRate = 3;
+protoai.childhood = 5;
 
 var closestNeighbor = function(cell, neighborhood) {
   var closest = null;
@@ -37,13 +45,12 @@ var closestNeighbor = function(cell, neighborhood) {
 };
 
 var notRelated = function(a, b) {
-  return (
-    a && b
-    && a.parent !== b.id 
-    && b.parent !== a.id 
-    && b.parent !== a.parent 
-    && a.id !== b.id
-  );
+  if (!a || !b) return false;
+  if (a.id === b.id) return false;
+
+  return a.lineage.some(function(x) {
+    return b.lineage.indexOf(x) == -1;
+  });
 };
 
 var vacantSpot = function(target) {
@@ -101,7 +108,7 @@ protoai.tick = function(cell, neighborhood, messages, time) {
 
 
   // Composable block
-  if (1 == 1) {
+  if (cell.age > protoai.childhood) {
   
     // If another cell is already in our VN neighborhood, EAT IT (unless it's our child)
     // Grab cells in von neumann neighborhood
@@ -183,13 +190,15 @@ var Left = React.createClass({displayName: 'Left',
     return ({
       population: 0,
       totalEnergy: 0,
+      averageAge: 0,
       gameRunning: false
     });
   },
   updatePopulation: function(data) {
     this.setState({
       population: data.population,
-      totalEnergy: data.totalEnergy
+      totalEnergy: data.totalEnergy,
+      averageAge: data.averageAge
     });
   },
   componentDidMount: function() {
@@ -249,6 +258,7 @@ var Left = React.createClass({displayName: 'Left',
         React.DOM.h2( {className:"mfb"}, "Statistics"),
         React.DOM.p( {className:"mfb"}, "Population: ", React.DOM.span(null, this.state.population)),
         React.DOM.p( {className:"mfb"}, "Total energy: ", React.DOM.span(null, this.state.totalEnergy)),
+        React.DOM.p( {className:"mfb"}, "Average age: ", React.DOM.span(null, this.state.averageAge.toFixed(2))),
         React.DOM.p( {className:"mfb"}, "Ratio: ", React.DOM.span(null, ratio)),
 
         React.DOM.h2( {className:"mfb"}, "Introduce AIs"),
@@ -291,7 +301,7 @@ var blockSize = 4;
 var config = {
   mapSize: mapSize/blockSize, 
   blockSize: blockSize,
-  speed: 500 
+  speed: 200 
 };
 
 var runner = (require("./runner")).init(config);
@@ -484,7 +494,7 @@ render.draw = function(game, config) {
 
   cells.forEach(function(cell) {
     if (cell.ai === "food") {
-      ctx.fillStyle = "lime";
+      ctx.fillStyle = "#555";
     }
     else {
       if (cell.age < 20) {
@@ -515,8 +525,9 @@ module.exports = render;
 var runner = {};
 
 // Dependencies
-var render = require("./render"),
-    aux = require("./helpers");
+var render = require("./render");
+var aux = require("./helpers");
+var cellutil = require("./cells/util");
 
 var ais = {
   "protoai": require("./cells/protoai"),
@@ -534,8 +545,6 @@ var _baseID = 0;
 
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
-
-  //runner.introduce();
 
   // Hack to wait for DOM to load
   window.setTimeout(function() {
@@ -565,17 +574,27 @@ runner.stop = function() {
 runner.createCell = function(options) {
   if (isNaN(options.x)) return; 
   if (isNaN(options.y)) return; 
-  if (!ais[options.ai]) return;
+  if (!(options.ai in ais)) return;
+
+  var lineage = options.lineage || [];
+
+  if (isNaN(options.color)) {
+    var color = aux.rand(256);
+  }
+  else {
+    var color = options.color;
+  }
+
   var cell = {
     x: options.x,
     y: options.y,
     age: 0,
     id: _baseID,
     energy: !isNaN(options.energy) ? options.energy : 100,
-    parent: !isNaN(options.parent) ? options.parent : 100,
+    lineage: lineage,
     ai: options.ai,
     type: options.type || "cell",
-    color: !isNaN(options.color) ? options.color+10 : 0 
+    color: color
   };
   game.cells.push(cell);
   _baseID += 1;
@@ -596,29 +615,45 @@ runner.defaultConfig = function(userConfig) {
 
 // Right now this introduces a bunch of randos
 // around a random spawn near the origin
-runner.introduce = function(specialAI) {
+runner.introduce = function(specialAI, num) {
   specialAI = specialAI || "protoai";
-  var num = 5;
-  var origin = 50;
+  num = num || 10;
+  var origin = 200;
   var xOff = aux.rand(origin) - origin/2;
   var yOff = aux.rand(origin) - origin/2;
-  var parentID = null;
+  var line = [];
+  var color;
   for (var i=0; i<num; i++) {
-    var newCell = runner.createCell({
+    var proto = {
       x: aux.rand(num*4)-num*2 + xOff, 
       y: aux.rand(num*4)-num*2 + yOff,
       ai: specialAI,
-      parent: parentID
-    });
-    if (i === 0) parentID = newCell.id;
+      lineage: line
+    };
+    if (color) proto.color = color; 
+    var newCell = runner.createCell(proto);
+    if (i === 0) {
+      line = [newCell.id];
+      color = newCell.color;
+    }
   }
 };
 
+var shuffleArray = function(array) {
+  for (var i = array.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
+}
+
 runner.tickAllCells = function() {
 
-  if (game.time % 5 == 0) {
-    runner.introduce("food");
-  } 
+  // Randomize order of array to make eating fair
+  game.cells = shuffleArray(game.cells);
+  // - I actually don't think this is necessary
 
   game.time += 1;
 
@@ -628,7 +663,12 @@ runner.tickAllCells = function() {
 
     // TODO: See if there are any messages
     cell.age += 1;
-    cell.energy -= 1; // Living takes energy, man
+    if (cell.ai === "food") {
+      cell.energy += 1; // EXPERIMENTAL photosynthesis
+    }
+    else {
+      cell.energy -= 1;
+    }
 
     // Cells die by running out of energy 
     if (cell.energy <= 0) {
@@ -636,7 +676,7 @@ runner.tickAllCells = function() {
       continue; 
     }
 
-    var neighborhood = runner.neighborhoodFor(cell, 40, game.cells);
+    var neighborhood = runner.neighborhoodFor(cell, 100, game.cells);
     var messages = []; // TODO: Pass in messages
     var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
@@ -657,16 +697,20 @@ runner.tickAllCells = function() {
       // Cell wants to reproduce
       if (runner.vacant(cell.x+1, cell.y)) {
 
+        var dir = cellutil.randDir();
+
         // TODO: Introduce genetic mutation here
         // TODO: Make reproduction take a lot of x-resources-- energy 
+        var newLineage = cell.lineage.slice();
+        newLineage.push(cell.id);
         runner.createCell({
-          x: cell.x+1, 
-          y: cell.y,
+          x: cell.x+dir[0], 
+          y: cell.y+dir[1],
           energy: passE,
           ai: cell.ai,
           type: cell.type,
-          color: cell.color,
-          parent: cell.id
+          lineage: newLineage,
+          color: cell.color 
         });
 
         cell.energy -= passE;
@@ -693,7 +737,8 @@ runner.tickAllCells = function() {
 
   runner.emit("end tick", {
     population: game.cells.length,
-    totalEnergy: runner.totalEnergy(game.cells)
+    totalEnergy: runner.totalEnergy(game.cells),
+    averageAge: runner.averageAge(game.cells)
   });
 };
 
@@ -701,6 +746,13 @@ runner.totalEnergy = function(cells) {
   return cells.reduce(function(acc, cur) {
     return acc + (cur.energy || 0);
   }, 0);
+};
+
+runner.averageAge = function(cells) {
+  var totalAge = cells.reduce(function(acc, cur) {
+    return acc + (cur.age || 0);
+  }, 0);
+  return totalAge / cells.length;
 };
 
 runner.neighborhoodFor = function(cell, size, cells) {
@@ -779,4 +831,4 @@ runner.validMove = function(move) {
 
 module.exports = runner;
 
-},{"./cells/food":1,"./cells/protoai":2,"./cells/rando":3,"./helpers":6,"./render":9}]},{},[7])
+},{"./cells/food":1,"./cells/protoai":2,"./cells/rando":3,"./cells/util":4,"./helpers":6,"./render":9}]},{},[7])

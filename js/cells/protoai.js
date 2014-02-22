@@ -3,9 +3,9 @@ var protoai = {};
 var cellutil = require("./util");
 var aux = require("../helpers");
 
-protoai.passEnergy = 40;
-protoai.reproductionRate = 5;
-protoai.childhood = 10;
+protoai.passEnergy = 100;
+protoai.reproductionRate = 3;
+protoai.childhood = 5;
 
 var closestNeighbor = function(cell, neighborhood) {
   var closest = null;
@@ -24,13 +24,12 @@ var closestNeighbor = function(cell, neighborhood) {
 };
 
 var notRelated = function(a, b) {
-  return (
-    a && b
-    && a.parent !== b.id 
-    && b.parent !== a.id 
-    && b.parent !== a.parent 
-    && a.id !== b.id
-  );
+  if (!a || !b) return false;
+  if (a.id === b.id) return false;
+
+  return a.lineage.some(function(x) {
+    return b.lineage.indexOf(x) == -1;
+  });
 };
 
 var vacantSpot = function(target) {
@@ -88,7 +87,7 @@ protoai.tick = function(cell, neighborhood, messages, time) {
 
 
   // Composable block
-  if (1 == 1) {
+  if (cell.age > protoai.childhood) {
   
     // If another cell is already in our VN neighborhood, EAT IT (unless it's our child)
     // Grab cells in von neumann neighborhood
