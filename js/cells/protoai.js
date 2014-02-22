@@ -3,7 +3,7 @@ var protoai = {};
 var cellutil = require("./util");
 var aux = require("../helpers");
 
-protoai.passEnergy = 250;
+protoai.passEnergy = 40;
 
 var closestNeighbor = function(cell, neighborhood) {
   var closest = null;
@@ -43,8 +43,7 @@ var vacantSpot = function(target) {
 };
 
 var at = function(x, y, neighborhood) {
-  if (x in neighborhood && y in neighborhood[x]) return neighborhood[x][y];
-  else return null;
+  return neighborhood[x] && neighborhood[x][y];
 };
 
 var vectorToward = function(x, y, cell) {
@@ -79,11 +78,12 @@ var vnn = function(cell, neighborhood) {
 };
 
 protoai.tick = function(cell, neighborhood, messages, time) {
-
+/*
   // Composable block
-  if (cell.age > 100 && cell.age % 25 == 0 && cell.energy > protoai.passEnergy) {
+  if (cell.age > 10 && cell.age % 25 == 0 && cell.energy > protoai.passEnergy) {
     return [2, 2]; // Reproduce
   }
+*/
 
   // Composable block
   if (1 == 1) {
@@ -95,9 +95,9 @@ protoai.tick = function(cell, neighborhood, messages, time) {
       var adj = soba[dir];
       // No cannibalism please
       if (adj && notRelated(cell, adj)) {
+        console.log("eat", cell, adj);
         // TODO: Distance to prey should be enforced in runner
         if (distanceTo(cell, adj) < 3) { 
-          console.log("attempt to eat", adj);
           return ({
             type: "eat",
             target: adj
@@ -112,8 +112,7 @@ protoai.tick = function(cell, neighborhood, messages, time) {
       // Locate a vacant spot in its von neumann neighborhood
       var target = vacantSpot(prey);
       // Return the direction that would take us closest to that cell 
-      var vec = vectorToward(target[0], target[1], cell);
-      return vec;
+      return vectorToward(target[0], target[1], cell);
     }
   }
 

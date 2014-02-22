@@ -37,17 +37,16 @@ _addAdj = function(cell) {
 _removeAdj = function(x, y) {
   var cell = _atAdj(x, y);
   if (cell) delete adjacency[x][y];
+  if (_atAdj(x, y)) throw "wtf";
 };
 
 _atAdj = function(x, y) {
-  if (x in adjacency && y in adjacency[x]) return adjacency[x][y];
-  else return null;
+  return adjacency[x] && adjacency[x][y];
 };
 
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
-  //runner.generateCells();
   //runner.introduce();
 
   // Hack to wait for DOM to load
@@ -75,18 +74,6 @@ runner.stop = function() {
   _interval = window.clearInterval(_interval);
 };
 
-// Returns a clean slate of cells
-runner.generateCells = function() {
-  var num = 20;
-  for (var i=0; i<num; i++) {
-    runner.createCell({
-      x: aux.rand(num*4)-num*2, 
-      y: aux.rand(num*4)-num*2,
-      ai: "protoai"
-    });
-  }
-};
-
 runner.createCell = function(options) {
   if (isNaN(options.x)) return; 
   if (isNaN(options.y)) return; 
@@ -96,7 +83,7 @@ runner.createCell = function(options) {
     y: options.y,
     age: 0,
     id: _baseID,
-    energy: !isNaN(options.energy) ? options.energy : 500,
+    energy: !isNaN(options.energy) ? options.energy : 100,
     parent: !isNaN(options.parent) ? options.parent : 100,
     ai: options.ai,
     type: options.type || "cell",
@@ -124,7 +111,7 @@ runner.defaultConfig = function(userConfig) {
 // around a random spawn near the origin
 runner.introduce = function(specialAI) {
   specialAI = specialAI || "protoai";
-  var num = 20;
+  var num = 5;
   var origin = 50;
   var xOff = aux.rand(origin) - origin/2;
   var yOff = aux.rand(origin) - origin/2;
@@ -139,57 +126,43 @@ runner.introduce = function(specialAI) {
     if (i === 0) parentID = newCell.id;
   }
 };
-runner.tickAllCells = function() {
 
-/*
-  if (game.time % 30 == 0) {
-    runner.introduce();
-  }
-*/
+var generateAdjListFromCells = function(cells) {
+};
+
+runner.tickAllCells = function() {
 
   game.time += 1;
 
   // For each cell
   for (var cellIndex in game.cells) {
     var cell = game.cells[cellIndex];
-//  game.cells.forEach(function(cell) {
 
-    // See if there are any messages
+    // TODO: See if there are any messages
     cell.age += 1;
     cell.energy -= 1; // Living takes energy, man
 
     // Cells die by running out of energy 
     if (cell.energy <= 0) {
-      return runner.removeCell(cell);
+      game.cells = runner.removeCell(cell);
+      continue; 
     }
 
-    // Cells die of overcrowding
-// Note: we were calculating atari incorrectly, causing a lot of cells to die
-/*
-    var dirs = [[0, 1], [0, -1], [1, 0], [-1, 0]];
-    var atari = dirs.some(function(d) {
-      return runner.vacant(cell.x+d[0], cell.y+d[1]);
-    });
-    if (!atari) {
-      runner.removeCell(cell);
-    }
-*/
-
-    var neighborhood = runner.neighborhoodFor(cell, 40);
+    var neighborhood = runner.neighborhoodFor(cell, 20, game.cells);
     var messages = []; // TODO: Pass in messages
+console.log("neighborhood", neighborhood);
     var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
     var passE = ais[cell.ai].passEnergy;
 
-    if (typeof move == "object" && "type" in move && move.type === "eat") {
+    if ("type" in move && move.type === "eat") {
       var target = move.target;
-      console.log("target", target);
       if (target) {
         var dist = Math.abs(target.x - cell.x) + Math.abs(target.y - cell.y);
         if (dist < 5) {
-          console.log("actually remove");
           cell.energy += target.energy;
-          return runner.removeCell(target)
+          game.cells = runner.removeCell(target);
+          continue;
         }
       }
     }
@@ -215,16 +188,16 @@ runner.tickAllCells = function() {
     }
     else {
 
-      if (!runner.validMove(move)) return;
+      if (!runner.validMove(move)) continue; 
 
       var desiredX = cell.x + move[0];
       var desiredY = cell.y + move[1];
 
       // TODO: If valid
-      if (!runner.cellExists(desiredX, desiredY)) {
+//      if (!runner.cellExists(desiredX, desiredY)) {
         runner.move(cell, desiredX, desiredY);
         cell.energy -= 1; // Costs 1 energy
-      }
+ //     }
     }
     
   };
@@ -243,7 +216,25 @@ runner.totalEnergy = function(cells) {
   }, 0);
 };
 
-runner.neighborhoodFor = function(cell, size) {
+runner.neighborhoodFor = function(cell, size, cells) {
+  var radius = size/2;
+  var startX = cell.x - radius;
+  var startY = cell.y - radius;
+  var endX = cell.x + radius;
+  var endY = cell.y + radius;
+  var neighborhood = {};
+  cells.forEach(function(c) {
+    if (c.x >= startX && c.x <= endX
+     && c.y >= startY && c.y <= endY) {
+      if (!(c.x in neighborhood)) neighborhood[c.x] = {};
+      neighborhood[c.x][c.y] = c;
+    }
+  });
+  return neighborhood;
+};
+
+// Unused, using adj
+runner.adj_neighborhoodFor = function(cell, size) {
   var radius = size/2,
       startX = cell.x - radius,
       startY = cell.y - radius,
@@ -291,16 +282,14 @@ runner.move = function(cell, x, y) {
 };
 
 runner.removeCell = function(cell) {
-  console.log("should not be null", runner.cellAt(cell.x, cell.y));
   _removeAdj(cell.x, cell.y);
   var i = game.cells.indexOf(cell);
-  console.log("i", i);
   if (i != -1) game.cells.splice(i, 1);
-  console.log("should be null", runner.cellAt(cell.x, cell.y));
+  return game.cells;
 };
 
 runner.cellExists = function(x, y) {
-  return !!_atAdj(x, y);
+  return Boolean(_atAdj(x, y));
 };
 
 runner.cellAt = function(x, y) {

@@ -41,6 +41,13 @@ var Left = React.createClass({
       self.updatePopulation(data);
       if (!self.state.gameRunning) self.setState({gameRunning: true});
     });
+
+    window.addEventListener("keydown", function(e) {
+      var letter = String.fromCharCode(e.keyCode);
+      if (letter == "S") {
+        runner.toggleStartStop();
+      }
+    });
   },
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
