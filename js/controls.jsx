@@ -20,13 +20,15 @@ var Left = React.createClass({
     return ({
       population: 0,
       totalEnergy: 0,
+      averageAge: 0,
       gameRunning: false
     });
   },
   updatePopulation: function(data) {
     this.setState({
       population: data.population,
-      totalEnergy: data.totalEnergy
+      totalEnergy: data.totalEnergy,
+      averageAge: data.averageAge
     });
   },
   componentDidMount: function() {
@@ -40,6 +42,13 @@ var Left = React.createClass({
     runner.on("end tick", function(data) {
       self.updatePopulation(data);
       if (!self.state.gameRunning) self.setState({gameRunning: true});
+    });
+
+    window.addEventListener("keydown", function(e) {
+      var letter = String.fromCharCode(e.keyCode);
+      if (letter == "S") {
+        runner.toggleStartStop();
+      }
     });
   },
   setZoom: function(direction) {
@@ -79,6 +88,7 @@ var Left = React.createClass({
         <h2 className="mfb">Statistics</h2>
         <p className="mfb">Population: <span>{this.state.population}</span></p>
         <p className="mfb">Total energy: <span>{this.state.totalEnergy}</span></p>
+        <p className="mfb">Average age: <span>{this.state.averageAge.toFixed(2)}</span></p>
         <p className="mfb">Ratio: <span>{ratio}</span></p>
 
         <h2 className="mfb">Introduce AIs</h2>
