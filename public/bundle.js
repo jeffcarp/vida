@@ -17,6 +17,8 @@ var cellutil = require("./util");
 var aux = require("../helpers");
 
 protoai.passEnergy = 40;
+protoai.reproductionRate = 5;
+protoai.childhood = 10;
 
 var closestNeighbor = function(cell, neighborhood) {
   var closest = null;
@@ -91,12 +93,12 @@ var vnn = function(cell, neighborhood) {
 };
 
 protoai.tick = function(cell, neighborhood, messages, time) {
-/*
+
   // Composable block
-  if (cell.age > 10 && cell.age % 25 == 0 && cell.energy > protoai.passEnergy) {
+  if (cell.age > protoai.childhood && cell.age % protoai.reproductionRate == 0 && cell.energy > protoai.passEnergy) {
     return [2, 2]; // Reproduce
   }
-*/
+
 
   // Composable block
   if (1 == 1) {
@@ -108,7 +110,6 @@ protoai.tick = function(cell, neighborhood, messages, time) {
       var adj = soba[dir];
       // No cannibalism please
       if (adj && notRelated(cell, adj)) {
-        console.log("eat", cell, adj);
         // TODO: Distance to prey should be enforced in runner
         if (distanceTo(cell, adj) < 3) { 
           return ({
@@ -290,7 +291,7 @@ var blockSize = 4;
 var config = {
   mapSize: mapSize/blockSize, 
   blockSize: blockSize,
-  speed: 1000 
+  speed: 500 
 };
 
 var runner = (require("./runner")).init(config);
@@ -531,31 +532,6 @@ var config = {};
 var _interval;
 var _baseID = 0;
 
-// TEST
-// The slowest function by far is cellExists(),
-// because it does an O(n) traversal at least once
-// per tick. Testing to see if I can speed it up by
-// using an adjacency list.
-var adjacency = {};
-
-_addAdj = function(cell) {
-  if (isNaN(cell.x) || isNaN(cell.y)) return;
-  if (!(cell.x in adjacency)) adjacency[cell.x] = {};
-  if (!(cell.y in adjacency[cell.x])) {
-    adjacency[cell.x][cell.y] = cell;
-  }
-};
-
-_removeAdj = function(x, y) {
-  var cell = _atAdj(x, y);
-  if (cell) delete adjacency[x][y];
-  if (_atAdj(x, y)) throw "wtf";
-};
-
-_atAdj = function(x, y) {
-  return adjacency[x] && adjacency[x][y];
-};
-
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
@@ -602,7 +578,6 @@ runner.createCell = function(options) {
     color: !isNaN(options.color) ? options.color+10 : 0 
   };
   game.cells.push(cell);
-  _addAdj(cell);
   _baseID += 1;
   return cell;
 };
@@ -639,10 +614,11 @@ runner.introduce = function(specialAI) {
   }
 };
 
-var generateAdjListFromCells = function(cells) {
-};
-
 runner.tickAllCells = function() {
+
+  if (game.time % 5 == 0) {
+    runner.introduce("food");
+  } 
 
   game.time += 1;
 
@@ -660,9 +636,8 @@ runner.tickAllCells = function() {
       continue; 
     }
 
-    var neighborhood = runner.neighborhoodFor(cell, 20, game.cells);
+    var neighborhood = runner.neighborhoodFor(cell, 40, game.cells);
     var messages = []; // TODO: Pass in messages
-console.log("neighborhood", neighborhood);
     var move = ais[cell.ai].tick(cell, neighborhood, messages, game.time);
 
     var passE = ais[cell.ai].passEnergy;
@@ -706,10 +681,10 @@ console.log("neighborhood", neighborhood);
       var desiredY = cell.y + move[1];
 
       // TODO: If valid
-//      if (!runner.cellExists(desiredX, desiredY)) {
+      if (!runner.cellExists(desiredX, desiredY)) {
         runner.move(cell, desiredX, desiredY);
         cell.energy -= 1; // Costs 1 energy
- //     }
+      }
     }
     
   };
@@ -745,26 +720,6 @@ runner.neighborhoodFor = function(cell, size, cells) {
   return neighborhood;
 };
 
-// Unused, using adj
-runner.adj_neighborhoodFor = function(cell, size) {
-  var radius = size/2,
-      startX = cell.x - radius,
-      startY = cell.y - radius,
-      endX = cell.x + radius,
-      endY = cell.y + radius,
-      neighborhood = {};
-  for (var i=startX; i<endX; i++) {
-    for (var j=startY; j<endY; j++) {
-      var p = _atAdj(i, j);
-      if (p) {
-        if (!(i in neighborhood)) neighborhood[i] = {};
-        neighborhood[i][j] = p;
-      }
-    }
-  }
-  return neighborhood;
-};
-
 runner.population = function() {
   return game.cells.length;
 };
@@ -787,25 +742,24 @@ runner.on = function(action, callback) {
 };
 
 runner.move = function(cell, x, y) {
-  _removeAdj(cell.x, cell.y);
-  _addAdj(cell);
   cell.x = x;
   cell.y = y;
 };
 
 runner.removeCell = function(cell) {
-  _removeAdj(cell.x, cell.y);
   var i = game.cells.indexOf(cell);
   if (i != -1) game.cells.splice(i, 1);
   return game.cells;
 };
 
 runner.cellExists = function(x, y) {
-  return Boolean(_atAdj(x, y));
+  return Boolean(runner.cellAt(x, y));
 };
 
 runner.cellAt = function(x, y) {
-  return _atAdj(x, y);
+  return game.cells.reduce(function(acc, cur) {
+    return (cur.x === x && cur.y === y) ? cur : acc; 
+  }, null);
 };
 
 runner.vacant = function(x, y) {

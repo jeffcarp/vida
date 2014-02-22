@@ -4,6 +4,8 @@ var cellutil = require("./util");
 var aux = require("../helpers");
 
 protoai.passEnergy = 40;
+protoai.reproductionRate = 5;
+protoai.childhood = 10;
 
 var closestNeighbor = function(cell, neighborhood) {
   var closest = null;
@@ -78,12 +80,12 @@ var vnn = function(cell, neighborhood) {
 };
 
 protoai.tick = function(cell, neighborhood, messages, time) {
-/*
+
   // Composable block
-  if (cell.age > 10 && cell.age % 25 == 0 && cell.energy > protoai.passEnergy) {
+  if (cell.age > protoai.childhood && cell.age % protoai.reproductionRate == 0 && cell.energy > protoai.passEnergy) {
     return [2, 2]; // Reproduce
   }
-*/
+
 
   // Composable block
   if (1 == 1) {
@@ -95,7 +97,6 @@ protoai.tick = function(cell, neighborhood, messages, time) {
       var adj = soba[dir];
       // No cannibalism please
       if (adj && notRelated(cell, adj)) {
-        console.log("eat", cell, adj);
         // TODO: Distance to prey should be enforced in runner
         if (distanceTo(cell, adj) < 3) { 
           return ({
