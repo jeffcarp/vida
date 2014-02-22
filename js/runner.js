@@ -141,7 +141,7 @@ runner.tickAllCells = function() {
     // TODO: See if there are any messages
     cell.age += 1;
     if (cell.ai === "food") {
-      cell.energy += 1; // EXPERIMENTAL photosynthesis
+      //cell.energy += 1; // EXPERIMENTAL photosynthesis
     }
     else {
       cell.energy -= 1;
