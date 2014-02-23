@@ -13,5 +13,11 @@
   "author": "Jeff Carpenter",
   "license": "BSD",
   "readmeFilename": "README.md",
-  "gitHead": "e5ebc95d2d431d0a0029e642fcf693696abaf7c5"
+  "gitHead": "e5ebc95d2d431d0a0029e642fcf693696abaf7c5",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "mocha": "~1.17.1",
+    "reactify": "~0.7.0"
+  }
 }
