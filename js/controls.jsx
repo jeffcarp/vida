@@ -21,6 +21,7 @@ var Left = React.createClass({
       population: 0,
       totalEnergy: 0,
       averageAge: 0,
+      totalTime: 0,
       gameRunning: false
     });
   },
@@ -28,7 +29,8 @@ var Left = React.createClass({
     this.setState({
       population: data.population,
       totalEnergy: data.totalEnergy,
-      averageAge: data.averageAge
+      averageAge: data.averageAge,
+      totalTime: data.times.total
     });
   },
   componentDidMount: function() {
@@ -90,6 +92,7 @@ var Left = React.createClass({
         <p className="mfb">Total energy: <span>{this.state.totalEnergy}</span></p>
         <p className="mfb">Average age: <span>{this.state.averageAge.toFixed(2)}</span></p>
         <p className="mfb">Ratio: <span>{ratio}</span></p>
+        <p className="mfb">Total tick time: <span>{this.state.totalTime.toFixed(2)}</span></p>
 
         <h2 className="mfb">Introduce AIs</h2>
 
