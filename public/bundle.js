@@ -191,6 +191,7 @@ var Left = React.createClass({displayName: 'Left',
       population: 0,
       totalEnergy: 0,
       averageAge: 0,
+      totalTime: 0,
       gameRunning: false
     });
   },
@@ -198,7 +199,8 @@ var Left = React.createClass({displayName: 'Left',
     this.setState({
       population: data.population,
       totalEnergy: data.totalEnergy,
-      averageAge: data.averageAge
+      averageAge: data.averageAge,
+      totalTime: data.times.total
     });
   },
   componentDidMount: function() {
@@ -260,6 +262,7 @@ var Left = React.createClass({displayName: 'Left',
         React.DOM.p( {className:"mfb"}, "Total energy: ", React.DOM.span(null, this.state.totalEnergy)),
         React.DOM.p( {className:"mfb"}, "Average age: ", React.DOM.span(null, this.state.averageAge.toFixed(2))),
         React.DOM.p( {className:"mfb"}, "Ratio: ", React.DOM.span(null, ratio)),
+        React.DOM.p( {className:"mfb"}, "Total tick time: ", React.DOM.span(null, this.state.totalTime.toFixed(2))),
 
         React.DOM.h2( {className:"mfb"}, "Introduce AIs"),
 
@@ -620,15 +623,16 @@ runner.defaultConfig = function(userConfig) {
 runner.introduce = function(specialAI, num) {
   specialAI = specialAI || "protoai";
   num = num || 10;
-  var origin = 200;
+  var space = 20;
+  var origin = 50;
   var xOff = aux.rand(origin) - origin/2;
   var yOff = aux.rand(origin) - origin/2;
   var line = [];
   var color;
   for (var i=0; i<num; i++) {
     var proto = {
-      x: aux.rand(num*4)-num*2 + xOff, 
-      y: aux.rand(num*4)-num*2 + yOff,
+      x: aux.rand(space*4)-space*2 + xOff, 
+      y: aux.rand(space*4)-space*2 + yOff,
       ai: specialAI,
       lineage: line
     };
@@ -651,7 +655,21 @@ var shuffleArray = function(array) {
   return array;
 }
 
+var cellsOfAi = function(ai) {
+  return game.cells.filter(function(c) {
+    return c && c.ai === ai;
+  });
+};
+
 runner.tickAllCells = function() {
+
+  // EXPR: Keep the food supply constant
+  var constNum = 100;
+  var foodLen = cellsOfAi("food").length;
+  if (foodLen < constNum) {
+    runner.introduce("food", constNum - foodLen);
+  }
+  
 
   // Randomize order of array to make eating fair
   game.cells = shuffleArray(game.cells);
@@ -659,8 +677,11 @@ runner.tickAllCells = function() {
 
   game.time += 1;
 
+  var tickTimes = []; 
+
   // For each cell
   for (var cellIndex in game.cells) {
+    var startTime = new Date();
     var cell = game.cells[cellIndex];
 
     // TODO: See if there are any messages
@@ -733,14 +754,35 @@ runner.tickAllCells = function() {
       }
     }
     
+    var endTime = new Date();
+    tickTimes.push(endTime - startTime);
   };
+
+  // Compute averate tick time
+  var totalTime = tickTimes.reduce(function(acc, cur) {
+    return acc + cur;
+  }, 0); 
+  var averageTime = totalTime / (game.cells.length || 1); 
+  var times = {
+    average: averageTime,
+    total: totalTime
+  };
+
+  var capacity = (config.speed * 0.95);
+  if (totalTime > capacity) {
+    runner.stop();
+    var msg = "totalTime exceeded 95% capacity ("+capacity+")";
+    alert(msg);
+    throw new Error(msg);
+  }
 
   render.setVars(game, config);
 
   runner.emit("end tick", {
     population: game.cells.length,
     totalEnergy: runner.totalEnergy(game.cells),
-    averageAge: runner.averageAge(game.cells)
+    averageAge: runner.averageAge(game.cells),
+    times: times 
   });
 };
 
