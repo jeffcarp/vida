@@ -5,7 +5,12 @@ var cellutil = require("./util");
 var aux = require("../helpers");
 
 food.reproductionRate = 30;
-food.passEnergy = 100;
+food.passEnergy = 50;
+
+food.alleles = {
+  reproductionRate: 30,
+  passEnergy: 100
+};
 
 food.tick = function(cell, neighborhood, messages, time) {
   // Composable block
@@ -13,7 +18,8 @@ food.tick = function(cell, neighborhood, messages, time) {
     return [2, 2]; // Reproduce
   }
 
-  return cellutil.randDir();
+  return [0, 0];
+  //return cellutil.randDir();
 };
 
 module.exports = food;
@@ -622,7 +628,7 @@ runner.defaultConfig = function(userConfig) {
 // around a random spawn near the origin
 runner.introduce = function(specialAI, num) {
   specialAI = specialAI || "protoai";
-  num = num || 10;
+  num = num || 30;
   var space = 20;
   var origin = 50;
   var xOff = aux.rand(origin) - origin/2;
@@ -664,11 +670,13 @@ var cellsOfAi = function(ai) {
 runner.tickAllCells = function() {
 
   // EXPR: Keep the food supply constant
+/*
   var constNum = 100;
   var foodLen = cellsOfAi("food").length;
   if (foodLen < constNum) {
     runner.introduce("food", constNum - foodLen);
   }
+*/
   
 
   // Randomize order of array to make eating fair
@@ -687,7 +695,9 @@ runner.tickAllCells = function() {
     // TODO: See if there are any messages
     cell.age += 1;
     if (cell.ai === "food") {
-      //cell.energy += 1; // EXPERIMENTAL photosynthesis
+      if (game.time % 5 == 0) {
+        cell.energy += 1; // EXPERIMENTAL photosynthesis
+      }
     }
     else {
       cell.energy -= 1;
