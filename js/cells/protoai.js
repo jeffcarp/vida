@@ -13,6 +13,7 @@ var closestNeighbor = function(cell, neighborhood) {
   for (var i in neighborhood) {
     for (var j in neighborhood[i]) {
       var c = neighborhood[i][j];
+      if (!c) continue;
       var dist = distanceTo(c, cell);
       if (dist < closestDist && notRelated(cell, c)) {
         closest = c;

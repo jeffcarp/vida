@@ -5,6 +5,9 @@ var runner = {};
 var render = require("./render");
 var aux = require("./helpers");
 var cellutil = require("./cells/util");
+var map = require("./map");
+
+console.log("map", map);
 
 var ais = {
   "protoai": require("./cells/protoai"),
@@ -54,13 +57,7 @@ runner.createCell = function(options) {
   if (!(options.ai in ais)) return;
 
   var lineage = options.lineage || [];
-
-  if (isNaN(options.color)) {
-    var color = aux.rand(256);
-  }
-  else {
-    var color = options.color;
-  }
+  var color = isNaN(options.color) ? aux.rand(256) : options.color;
 
   var cell = {
     x: options.x,
@@ -74,6 +71,7 @@ runner.createCell = function(options) {
     color: color
   };
   game.cells.push(cell);
+  map.add(cell);
   _baseID += 1;
   return cell;
 };
@@ -247,9 +245,10 @@ runner.tickAllCells = function() {
   var capacity = (config.speed * 0.95);
   if (totalTime > capacity) {
     runner.stop();
-    var msg = "totalTime exceeded 95% capacity ("+capacity+")";
-    alert(msg);
-    throw new Error(msg);
+    config.speed = config.speed * 2;
+    var msg = "totalTime exceeded 95% capacity ("+capacity+"), slowing to "+config.speed;
+    console.warn(msg);
+    runner.start();
   }
 
   render.setVars(game, config);
@@ -276,6 +275,8 @@ runner.averageAge = function(cells) {
 };
 
 runner.neighborhoodFor = function(cell, size, cells) {
+  return map.neighborhood(cell, size);
+/*
   var radius = size/2;
   var startX = cell.x - radius;
   var startY = cell.y - radius;
@@ -290,6 +291,7 @@ runner.neighborhoodFor = function(cell, size, cells) {
     }
   });
   return neighborhood;
+*/
 };
 
 runner.population = function() {
@@ -316,16 +318,19 @@ runner.on = function(action, callback) {
 runner.move = function(cell, x, y) {
   cell.x = x;
   cell.y = y;
+  map.move(cell.x, cell.y, x, y);
 };
 
 runner.removeCell = function(cell) {
+  map.remove(cell.x, cell.y);
   var i = game.cells.indexOf(cell);
   if (i != -1) game.cells.splice(i, 1);
   return game.cells;
 };
 
 runner.cellExists = function(x, y) {
-  return Boolean(runner.cellAt(x, y));
+  return map.exists(x, y);
+  //return Boolean(runner.cellAt(x, y));
 };
 
 runner.cellAt = function(x, y) {
