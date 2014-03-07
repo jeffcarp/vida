@@ -82,9 +82,9 @@ var vnn = function(cell, neighborhood) {
 protoai.tick = function(cell, neighborhood, messages, time) {
 
   // Composable block
-  if (cell.age > protoai.childhood && cell.age % protoai.reproductionRate == 0 && cell.energy > protoai.passEnergy) {
-    return [2, 2]; // Reproduce
-  }
+//  if (cell.age > protoai.childhood && cell.age % protoai.reproductionRate == 0 && cell.energy > protoai.passEnergy) {
+ //   return [2, 2]; // Reproduce
+ // }
 
 
   // Composable block

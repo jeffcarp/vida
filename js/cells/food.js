@@ -13,12 +13,12 @@ food.alleles = {
 
 food.tick = function(cell, neighborhood, messages, time) {
   // Composable block
-  if (cell.age % food.reproductionRate == 0 && cell.energy > food.passEnergy) {
-    return [2, 2]; // Reproduce
-  }
+//  if (cell.age % food.reproductionRate == 0 && cell.energy > food.passEnergy) {
+ //   return [2, 2]; // Reproduce
+  //}
 
-  return [0, 0];
-  //return cellutil.randDir();
+  //return [0, 0];
+  return cellutil.randDir();
 };
 
 module.exports = food;

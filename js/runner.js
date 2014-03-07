@@ -192,9 +192,8 @@ runner.tickAllCells = function() {
     }
     else if (move[0] === 2 && move[1] === 2 && cell.energy > passE) {
       // Cell wants to reproduce
-      if (runner.vacant(cell.x+1, cell.y)) {
-
-        var dir = cellutil.randDir();
+      var dir = cellutil.randDir();
+      if (runner.vacant(cell.x+dir[0], cell.y+dir[1])) {
 
         // TODO: Introduce genetic mutation here
         // TODO: Make reproduction take a lot of x-resources-- energy 
@@ -211,7 +210,6 @@ runner.tickAllCells = function() {
         });
 
         cell.energy -= passE;
-      
       }
     }
     else {

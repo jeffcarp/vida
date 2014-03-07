@@ -14,12 +14,12 @@ food.alleles = {
 
 food.tick = function(cell, neighborhood, messages, time) {
   // Composable block
-  if (cell.age % food.reproductionRate == 0 && cell.energy > food.passEnergy) {
-    return [2, 2]; // Reproduce
-  }
+//  if (cell.age % food.reproductionRate == 0 && cell.energy > food.passEnergy) {
+ //   return [2, 2]; // Reproduce
+  //}
 
-  return [0, 0];
-  //return cellutil.randDir();
+  //return [0, 0];
+  return cellutil.randDir();
 };
 
 module.exports = food;
@@ -109,9 +109,9 @@ var vnn = function(cell, neighborhood) {
 protoai.tick = function(cell, neighborhood, messages, time) {
 
   // Composable block
-  if (cell.age > protoai.childhood && cell.age % protoai.reproductionRate == 0 && cell.energy > protoai.passEnergy) {
-    return [2, 2]; // Reproduce
-  }
+//  if (cell.age > protoai.childhood && cell.age % protoai.reproductionRate == 0 && cell.energy > protoai.passEnergy) {
+ //   return [2, 2]; // Reproduce
+ // }
 
 
   // Composable block
@@ -233,11 +233,8 @@ var Left = React.createClass({displayName: 'Left',
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
-  introduceRando: function() {
-    runner.introduce("protoai");
-  },
-  introduceFood: function() {
-    runner.introduce("food");
+  introduce: function(ai) {
+    runner.introduce(ai);
   },
   render: function() {
     var ratio = (this.state.totalEnergy / this.state.population).toFixed(2);
@@ -274,12 +271,17 @@ var Left = React.createClass({displayName: 'Left',
         React.DOM.h2( {className:"mfb"}, "Introduce AIs"),
 
         React.DOM.div( 
-          {onClick:this.introduceRando,
+          {onClick:this.introduce.bind(this, "protoai"),
           className:"butn"}
           , "ProtoAI"),
 
         React.DOM.div( 
-          {onClick:this.introduceFood,
+          {onClick:this.introduce.bind(this, "rando"),
+          className:"butn"}
+          , "Rando"),
+
+        React.DOM.div( 
+          {onClick:this.introduce.bind(this, "food"),
           className:"butn"}
           , "Food")
 
@@ -800,9 +802,8 @@ runner.tickAllCells = function() {
     }
     else if (move[0] === 2 && move[1] === 2 && cell.energy > passE) {
       // Cell wants to reproduce
-      if (runner.vacant(cell.x+1, cell.y)) {
-
-        var dir = cellutil.randDir();
+      var dir = cellutil.randDir();
+      if (runner.vacant(cell.x+dir[0], cell.y+dir[1])) {
 
         // TODO: Introduce genetic mutation here
         // TODO: Make reproduction take a lot of x-resources-- energy 
@@ -819,7 +820,6 @@ runner.tickAllCells = function() {
         });
 
         cell.energy -= passE;
-      
       }
     }
     else {
