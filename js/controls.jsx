@@ -68,8 +68,8 @@ var Left = React.createClass({
       <div id="left">
         <div className="mfb">
           <div className="mfb"><h1>Welcome to Vida!</h1></div>
-          <p className="mfb">Vida is a platform for building and playing with cell AIs written in JavaScript.</p>
-          <p className="mfb small">To move, drag the screen around. Try introducing a few new AIs. If you're really adventurous, try the tutorial. As always, contact Jeff with any concerns.</p>
+          <p className="mfb">Vida is a platform for playing with cell AIs written in JavaScript.</p>
+          <p className="mfb small">To move, drag the screen around. Try introducing a few new AIs.</p>
         </div>
 
         <div className="mfb">

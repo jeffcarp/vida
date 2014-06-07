@@ -238,8 +238,8 @@ var Left = React.createClass({displayName: 'Left',
       React.DOM.div( {id:"left"}, 
         React.DOM.div( {className:"mfb"}, 
           React.DOM.div( {className:"mfb"}, React.DOM.h1(null, "Welcome to Vida!")),
-          React.DOM.p( {className:"mfb"}, "Vida is a platform for building and playing with cell AIs written in JavaScript."),
-          React.DOM.p( {className:"mfb small"}, "To move, drag the screen around. Try introducing a few new AIs. If you're really adventurous, try the tutorial. As always, contact Jeff with any concerns.")
+          React.DOM.p( {className:"mfb"}, "Vida is a platform for playing with cell AIs written in JavaScript."),
+          React.DOM.p( {className:"mfb small"}, "To move, drag the screen around. Try introducing a few new AIs.")
         ),
 
         React.DOM.div( {className:"mfb"}, 
