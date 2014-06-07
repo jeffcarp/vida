@@ -29,7 +29,9 @@ runner.init = function(userConfig) {
     render.init(config);
   }, 75);
 
-  //runner.start();
+  runner.start();
+  runner.introduce();
+  runner.introduce();
 };
 
 runner.toggleStartStop = function() {

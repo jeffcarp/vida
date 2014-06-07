@@ -304,7 +304,7 @@ var blockSize = 4;
 var config = {
   mapSize: mapSize/blockSize, 
   blockSize: blockSize,
-  speed: 200 
+  speed: 100 
 };
 
 var runner = (require("./runner")).init(config);
@@ -557,7 +557,9 @@ runner.init = function(userConfig) {
     render.init(config);
   }, 75);
 
-  //runner.start();
+  runner.start();
+  runner.introduce();
+  runner.introduce();
 };
 
 runner.toggleStartStop = function() {
