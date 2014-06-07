@@ -1,5 +1,7 @@
 # Vida
 
+! Note: the purpose and design of Vida has changed a bit since this was written. See the gh-pages branch for more.
+
 Vida is a game for building and playing with emergent Artificial Intelligence in JavaScript. It takes inspiration from the game [Go](http://en.wikipedia.org/wiki/Go_%28game%29) and [Conway's Game of Life](http://en.wikipedia.org/wiki/Conway's_Game_of_Life).
 
 ![Vida game in progress](http://jeffcarp.github.io/vida/images/sample-3.png)
