@@ -55,8 +55,11 @@ var Left = React.createClass({displayName: 'Left',
   setZoom: function(direction) {
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
-  introduceRando: function() {
+  introduceProtoai: function() {
     runner.introduce("protoai");
+  },
+  introduceRando: function() {
+    runner.introduce("rando");
   },
   introduceFood: function() {
     runner.introduce("food");
@@ -87,18 +90,23 @@ var Left = React.createClass({displayName: 'Left',
         ),
 
         React.DOM.h2({className: "mfb"}, "Statistics"),
-        React.DOM.p({className: "mfb"}, "Population: ", React.DOM.span(null, this.state.population)),
+        React.DOM.p({className: "mfb"}, "Population: ", React.DOM.span(null, this.state.population), " cells"),
         React.DOM.p({className: "mfb"}, "Total energy: ", React.DOM.span(null, this.state.totalEnergy)),
-        React.DOM.p({className: "mfb"}, "Average age: ", React.DOM.span(null, this.state.averageAge.toFixed(2))),
-        React.DOM.p({className: "mfb"}, "Ratio: ", React.DOM.span(null, ratio)),
-        React.DOM.p({className: "mfb"}, "Total tick time: ", React.DOM.span(null, this.state.totalTime.toFixed(2))),
+        React.DOM.p({className: "mfb"}, "Energy/Population: ", React.DOM.span(null, ratio)),
+        React.DOM.p({className: "mfb"}, "Average age: ", React.DOM.span(null, this.state.averageAge.toFixed(2)), " ticks"),
+        React.DOM.p({className: "mfb"}, "Total tick time: ", React.DOM.span(null, this.state.totalTime.toFixed(2)), " ms"),
 
         React.DOM.h2({className: "mfb"}, "Introduce AIs"),
 
         React.DOM.div({
-          onClick: this.introduceRando,
+          onClick: this.introduceProtoai,
           className: "butn"
           }, "ProtoAI"),
+
+        React.DOM.div({
+          onClick: this.introduceRando,
+          className: "butn"
+          }, "Random"),
 
         React.DOM.div({
           onClick: this.introduceFood,

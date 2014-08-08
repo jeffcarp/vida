@@ -1,4 +1,7 @@
-var mapSize = document.getElementById("grid").width;
+var grid = document.getElementById('grid');
+require('autoscale-canvas')(grid);
+
+var mapSize = grid.width;
 var blockSize = 4;
 
 // Game params
