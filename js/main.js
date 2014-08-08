@@ -3,13 +3,11 @@ var blockSize = 4;
 
 // Game params
 var config = {
-  mapSize: mapSize/blockSize, 
+  mapSize: mapSize/blockSize,
   blockSize: blockSize,
-  speed: 200 
+  speed: 1000
 };
 
 var runner = (require("./runner")).init(config);
-
-window.React = require("./react");
-
-require("./controls.jsx");
+window.React = require("react");
+require("./controls");

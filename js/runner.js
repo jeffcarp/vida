@@ -9,7 +9,7 @@ var cellutil = require("./cells/util");
 var ais = {
   "protoai": require("./cells/protoai"),
   "food": require("./cells/food"),
-  "rando": require("./cells/rando") 
+  "rando": require("./cells/rando")
 };
 
 var game = {
@@ -49,8 +49,8 @@ runner.stop = function() {
 };
 
 runner.createCell = function(options) {
-  if (isNaN(options.x)) return; 
-  if (isNaN(options.y)) return; 
+  if (isNaN(options.x)) return;
+  if (isNaN(options.y)) return;
   if (!(options.ai in ais)) return;
 
   var lineage = options.lineage || [];
@@ -103,12 +103,12 @@ runner.introduce = function(specialAI, num) {
   var color;
   for (var i=0; i<num; i++) {
     var proto = {
-      x: aux.rand(space*4)-space*2 + xOff, 
+      x: aux.rand(space*4)-space*2 + xOff,
       y: aux.rand(space*4)-space*2 + yOff,
       ai: specialAI,
       lineage: line
     };
-    if (color) proto.color = color; 
+    if (color) proto.color = color;
     var newCell = runner.createCell(proto);
     if (i === 0) {
       line = [newCell.id];
@@ -141,7 +141,7 @@ runner.tickAllCells = function() {
   if (foodLen < constNum) {
     runner.introduce("food", constNum - foodLen);
   }
-  
+
 
   // Randomize order of array to make eating fair
   game.cells = shuffleArray(game.cells);
@@ -149,7 +149,7 @@ runner.tickAllCells = function() {
 
   game.time += 1;
 
-  var tickTimes = []; 
+  var tickTimes = [];
 
   // For each cell
   for (var cellIndex in game.cells) {
@@ -165,10 +165,10 @@ runner.tickAllCells = function() {
       cell.energy -= 1;
     }
 
-    // Cells die by running out of energy 
+    // Cells die by running out of energy
     if (cell.energy <= 0) {
       game.cells = runner.removeCell(cell);
-      continue; 
+      continue;
     }
 
     var neighborhood = runner.neighborhoodFor(cell, 100, game.cells);
@@ -195,26 +195,26 @@ runner.tickAllCells = function() {
         var dir = cellutil.randDir();
 
         // TODO: Introduce genetic mutation here
-        // TODO: Make reproduction take a lot of x-resources-- energy 
+        // TODO: Make reproduction take a lot of x-resources-- energy
         var newLineage = cell.lineage.slice();
         newLineage.push(cell.id);
         runner.createCell({
-          x: cell.x+dir[0], 
+          x: cell.x+dir[0],
           y: cell.y+dir[1],
           energy: passE,
           ai: cell.ai,
           type: cell.type,
           lineage: newLineage,
-          color: cell.color 
+          color: cell.color
         });
 
         cell.energy -= passE;
-      
+
       }
     }
     else {
 
-      if (!runner.validMove(move)) continue; 
+      if (!runner.validMove(move)) continue;
 
       var desiredX = cell.x + move[0];
       var desiredY = cell.y + move[1];
@@ -225,7 +225,7 @@ runner.tickAllCells = function() {
         cell.energy -= 1; // Costs 1 energy
       }
     }
-    
+
     var endTime = new Date();
     tickTimes.push(endTime - startTime);
   };
@@ -233,8 +233,8 @@ runner.tickAllCells = function() {
   // Compute averate tick time
   var totalTime = tickTimes.reduce(function(acc, cur) {
     return acc + cur;
-  }, 0); 
-  var averageTime = totalTime / (game.cells.length || 1); 
+  }, 0);
+  var averageTime = totalTime / (game.cells.length || 1);
   var times = {
     average: averageTime,
     total: totalTime
@@ -254,7 +254,7 @@ runner.tickAllCells = function() {
     population: game.cells.length,
     totalEnergy: runner.totalEnergy(game.cells),
     averageAge: runner.averageAge(game.cells),
-    times: times 
+    times: times
   });
 };
 
@@ -298,7 +298,7 @@ runner.emit = function(action, data) {
     _callbacks[action].forEach(function(callback) {
       callback.call(null, data);
     });
-  } 
+  }
 };
 runner.on = function(action, callback) {
   if (action in _callbacks) {
@@ -326,13 +326,13 @@ runner.cellExists = function(x, y) {
 
 runner.cellAt = function(x, y) {
   return game.cells.reduce(function(acc, cur) {
-    return (cur.x === x && cur.y === y) ? cur : acc; 
+    return (cur.x === x && cur.y === y) ? cur : acc;
   }, null);
 };
 
 runner.vacant = function(x, y) {
   // TODO: Add outOfBounds()
-  return !runner.cellExists(x, y); 
+  return !runner.cellExists(x, y);
 };
 
 runner.validMove = function(move) {
