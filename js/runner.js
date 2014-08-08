@@ -24,10 +24,10 @@ runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
   // Hack to wait for DOM to load
-  window.setTimeout(function() {
+  window.onload = function() {
     render.setVars(game, config);
     render.init(config);
-  }, 75);
+  };
 
   runner.introduce();
   runner.start();
