@@ -29,7 +29,7 @@ runner.init = function(userConfig) {
     render.init(config);
   };
 
-  runner.introduce();
+  //runner.introduce();
   runner.start();
 };
 
@@ -137,12 +137,13 @@ var cellsOfAi = function(ai) {
 runner.tickAllCells = function() {
 
   // EXPR: Keep the food supply constant
+  /*
   var constNum = 100;
   var foodLen = cellsOfAi("food").length;
   if (foodLen < constNum) {
     runner.introduce("food", constNum - foodLen);
   }
-
+  */
 
   // Randomize order of array to make eating fair
   game.cells = shuffleArray(game.cells);
@@ -219,6 +220,13 @@ runner.tickAllCells = function() {
 
       var desiredX = cell.x + move[0];
       var desiredY = cell.y + move[1];
+
+      // TEMP
+      var graphExists = runner.cellExists(desiredX, desiredY);
+      var canvasExists = render.interestingCellExists(desiredX, desiredY);
+      if (graphExists !== canvasExists) {
+        alert('inconsistency between graph and canvas data fetching');
+      }
 
       // TODO: If valid
       if (!runner.cellExists(desiredX, desiredY)) {
@@ -326,6 +334,7 @@ runner.cellExists = function(x, y) {
 };
 
 runner.cellAt = function(x, y) {
+  //return render.interestingCellExists(x, y); welp, that wasn't faster
   return game.cells.reduce(function(acc, cur) {
     return (cur.x === x && cur.y === y) ? cur : acc;
   }, null);

@@ -1,10 +1,10 @@
 var assert = require("assert");
 
-describe('runner', function(){
+describe('runner', function() {
 
   var runner = require("../js/runner");
 
-  describe('createCell', function(){
+  describe('createCell', function() {
     it('should handle the base case', function() {
 
       var cell = runner.createCell({

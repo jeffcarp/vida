@@ -1,4 +1,4 @@
-/* 
+/*
 # Vida Renderer
 
 ## Coordinate System
@@ -69,7 +69,7 @@ render.init = function(config) {
   var ofsX = null;
   var ofsY = null;
 
-  canvas.addEventListener("mousedown", function(e) { 
+  canvas.addEventListener("mousedown", function(e) {
     enteredX = (e.x - canvas.offsetLeft) * render.zoom;
     enteredY = (e.y - canvas.offsetTop) * render.zoom;
     ofsX = render.offsetX;
@@ -92,7 +92,7 @@ render.init = function(config) {
   });
 
   canvas.addEventListener("mousemove", function(e) {
-    if (!enteredX || !enteredY) return; 
+    if (!enteredX || !enteredY) return;
 
     var ex = (e.x - canvas.offsetLeft) * render.zoom;
     var ey = (e.y - canvas.offsetTop) * render.zoom;
@@ -140,7 +140,7 @@ render.setVars = function(game, config) {
   render.cachedBlockSize = blockSize;
 };
 
-// Takes a game state from runner.js and draws that on a canvas 
+// Takes a game state from runner.js and draws that on a canvas
 render.draw = function(game, config) {
 
   if (!setup) render.init(config);
@@ -163,10 +163,10 @@ render.draw = function(game, config) {
     }
     else {
       if (cell.age < 20) {
-        var lum = 80 - cell.age*2; 
+        var lum = 80 - cell.age*2;
       }
       else {
-        var lum = 40; 
+        var lum = 40;
       }
       ctx.fillStyle = "hsl("+cell.color+", 50%, "+lum+"%)";
     }
@@ -175,12 +175,28 @@ render.draw = function(game, config) {
     //   our cells' central origin coords to the canvas's top left coords
     // I feel like we just have to add half the canvas size
     ctx.fillRect(
-      (cell.x*blockSize)+render.offsetX, 
-      (cell.y*blockSize)+render.offsetY, 
-      blockSize, 
+      (cell.x*blockSize)+render.offsetX,
+      (cell.y*blockSize)+render.offsetY,
+      blockSize,
       blockSize);
+
   });
 
+};
+
+render.getDataAt = function(x, y) {
+  var blockSize = render.cachedBlockSize || 2;
+
+  var dataX = (x*blockSize)+render.offsetX;
+  var dataY = (y*blockSize)+render.offsetY;
+  return ctx.getImageData(dataX, dataY, 1, 1).data;
+};
+
+render.interestingCellExists = function(x, y) {
+  var colorData = render.getDataAt(x, y);
+  return colorData[0] > 0
+      && colorData[1] > 0
+      && colorData[2] > 0;
 };
 
 module.exports = render;
