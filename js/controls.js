@@ -1,5 +1,6 @@
 var runner = require("./runner");
 var render = require("./render");
+var React = require('react');
 
 var StartStop = React.createClass({displayName: 'StartStop',
   render: function() {

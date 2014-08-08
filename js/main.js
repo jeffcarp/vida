@@ -9,5 +9,4 @@ var config = {
 };
 
 var runner = (require("./runner")).init(config);
-window.React = require("react");
 require("./controls");
