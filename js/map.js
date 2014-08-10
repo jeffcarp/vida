@@ -23,6 +23,12 @@ Map.prototype.idAt = function(x, y) {
 };
 
 Map.prototype.place = function(cell, x, y) {
+  if (x > this.width || x < -this.width) {
+    return false;
+  }
+  if (y > this.height || y < -this.height) {
+    return false;
+  }
   if (cell.id && this.vacant(x, y)) {
     cell.x = x;
     cell.y = y;
@@ -63,6 +69,12 @@ Map.prototype.move = function(from, to) {
   var fromY = from[1];
   var toX = to[0];
   var toY = to[1];
+  if (toX > this.width || toX < -this.width) {
+    return false;
+  }
+  if (toY > this.height || toY < -this.height) {
+    return false;
+  }
   if (this.vacant(fromX, fromY)) {
     return false;
   }

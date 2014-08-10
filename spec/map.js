@@ -46,6 +46,10 @@ describe('Map', function() {
       expect(map.place({}, 5, 5)).to.be.false;
     });
 
+    it('should return false if cell is out of bounds', function() {
+      expect(map.place({id: 7}, -150, 5)).to.be.false;
+    });
+
     it('should return true if successful and store it', function() {
       var res = map.place({id: 8}, 5, 5);
       expect(res).to.be.true;
@@ -81,6 +85,22 @@ describe('Map', function() {
       map.place({id: 7}, 5, 5);
       map.place({id: 9}, 5, 6);
       expect(map.move([5, 6], [5, 5])).to.be.false;
+    });
+
+    it('returns false if out of bounds (x)', function() {
+      map.place({id: 7}, 99, 5);
+      expect(map.move([99, 5], [100, 5])).to.be.false;
+      map.place({id: 8}, -99, 5);
+      expect(map.move([-99, 5], [-100, 5])).to.be.false;
+    });
+
+    it('returns false if out of bounds (y)', function() {
+      map.place({id: 7}, 5, 99);
+      expect(map.move([5, 99], [5, 100])).to.be.false;
+      expect(map.vacant(5, 99)).to.be.false;
+      map.place({id: 8}, 5, -99);
+      expect(map.move([5, -99], [5, -100])).to.be.false;
+      expect(map.vacant(5, -99)).to.be.false;
     });
 
     it('returns true if move is successful', function() {
