@@ -1,5 +1,5 @@
 var grid = document.getElementById('grid');
-require('autoscale-canvas')(grid);
+//require('autoscale-canvas')(grid);
 
 var mapSize = grid.width;
 var blockSize = 4;
