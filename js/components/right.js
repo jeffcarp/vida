@@ -6,7 +6,8 @@ var Right = module.exports = React.createClass({
     return ({
       population: 0,
       totalEnergy: 0,
-      averageAge: 0
+      averageAge: 0,
+      totalTime: 0
     });
   },
   componentDidMount: function() {
@@ -14,7 +15,8 @@ var Right = module.exports = React.createClass({
       this.setState({
         population: data.population,
         totalEnergy: data.totalEnergy,
-        averageAge: data.averageAge
+        averageAge: data.averageAge,
+        totalTime: data.totalTime
       });
     }.bind(this));
   },
@@ -28,6 +30,9 @@ var Right = module.exports = React.createClass({
       d.p({className: "mfb"},
           "Total energy: ",
           this.state.totalEnergy),
+      d.p({className: "mfb"},
+          "Total time x: ",
+          this.state.totalTime),
       d.p({className: "mfb"},
           "Energy/Population: ",
           d.span(null, ratio)),

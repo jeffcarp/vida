@@ -1,21 +1,29 @@
 var expect = require('chai').expect;
-var ai = require("../js/cells/prototype");
+var aiLibrary = require("../js/cells/library");
 
-describe('Any AI (now prototype)', function() {
+Object.keys(aiLibrary).forEach(function(key) {
+  var ai = aiLibrary[key];
 
-  it('should be an object', function() {
-    expect(ai).to.be.an('object');
-  });
+  describe('AI: '+key, function() {
 
-  it('should have a tick function', function() {
-    expect(ai.tick).to.be.a('function');
-  });
-
-  describe('#tick', function() {
-    it('should return a two element array', function() {
-      expect(ai.tick()).to.be.an('array');
+    it('should be an object', function() {
+      expect(ai).to.be.an('object');
     });
-  });
 
+    it('should have a tick function', function() {
+      expect(ai.tick).to.be.a('function');
+    });
+
+    describe('#tick', function() {
+      it('should return an object with x and y', function() {
+        var move = ai.tick();
+        expect(move).to.be.an('object');
+        expect(move.x).to.be.a('number');
+        expect(move.y).to.be.a('number');
+      });
+    });
+
+  });
 });
+
 

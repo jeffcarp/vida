@@ -18,7 +18,7 @@ var renderer = new Renderer(grid, bus);
 var game = new Game({
   bus: bus,
   map: map,
-  initialSpeed: 2e3
+  initialSpeed: 500
 });
 
 renderer.draw();

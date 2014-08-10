@@ -1,3 +1,5 @@
+var rando = require('./cells/rando');
+
 var Game = module.exports = function(options) {
 
   if (!options.map) throw Error('no map');
@@ -5,6 +7,10 @@ var Game = module.exports = function(options) {
   this.bus = options.bus;
   this.map = options.map;
   this.speed = options.initialSpeed || 2e3;
+
+  this.ais = {
+    'rando': rando
+  };
 
   this.running = false;
   this.age = 0;
@@ -15,15 +21,15 @@ var Game = module.exports = function(options) {
 
   // TRY
   var cell = {
-    x: 50,
-    y: -10,
+    x: 20,
+    y: -5,
     id: 1,
     hue: 200
   };
 
   this.map.place(cell, cell.x, cell.y);
   var cell = {
-    x: -30,
+    x: -10,
     y: 0,
     id: 2,
     hue: 100
@@ -54,17 +60,23 @@ Game.prototype.stop = function() {
 
 Game.prototype.tickAllCells = function() {
 
+  var startTime = new Date();
+
   this.map.activeCells().forEach(function(cell) {
+    var move = this.ais['rando'].tick();
     var x = cell.x;
     var y = cell.y;
-    this.map.move([x, y], [x, y+1]);
+    this.map.move([x, y], [x + move.x, y + move.y]);
   }.bind(this));
+
+  var endTime = new Date();
+  var totalTime = endTime - startTime;
 
   this.bus.emit('end tick', {
     population: this.map.activeCells().length,
     totalEnergy: 2,
     averageAge: 2,
-    totalTime: 2,
+    totalTime: totalTime,
     cells: this.map.activeCells()
   });
 

@@ -55,7 +55,7 @@ var Left = React.createClass({
     }.bind(this));
 
     this.props.bus.on("game stop", function() {
-      self.setState({gameRunning: false});
+      this.setState({gameRunning: false});
     }.bind(this));
 
     window.addEventListener("keydown", function(e) {
