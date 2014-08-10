@@ -13,11 +13,20 @@ var Game = module.exports = function(options) {
     this.bus.on('request game start', this.toggle.bind(this));
   }
 
+  // TRY
   var cell = {
     x: 50,
     y: -10,
     id: 1,
     hue: 200
+  };
+
+  this.map.place(cell, cell.x, cell.y);
+  var cell = {
+    x: -30,
+    y: 0,
+    id: 2,
+    hue: 100
   };
 
   this.map.place(cell, cell.x, cell.y);
@@ -52,12 +61,10 @@ Game.prototype.tickAllCells = function() {
   }.bind(this));
 
   this.bus.emit('end tick', {
-    population: 2,
+    population: this.map.activeCells().length,
     totalEnergy: 2,
     averageAge: 2,
-    times: {
-      total: 2
-    },
+    totalTime: 2,
     cells: this.map.activeCells()
   });
 

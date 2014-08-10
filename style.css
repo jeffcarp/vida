@@ -37,6 +37,8 @@ p {
 
 #left {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 200px;
   height: 100%;
   background-color: rgba(255, 255, 255, 0.1);
@@ -44,8 +46,21 @@ p {
   padding: 1em;
   overflow-y: auto;
 }
-#left h1 {
+#left h1,
+#right h1 {
   font-size: 1.2em;
+}
+
+#right {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  padding: 1em;
+  overflow-y: auto;
 }
 
 #grid {
