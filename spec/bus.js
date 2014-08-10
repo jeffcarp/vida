@@ -1,13 +1,36 @@
 var expect = require('chai').expect;
-var bus = require("../js/bus");
+var Bus = require("../js/bus");
 
-describe('bus', function() {
+describe('Bus', function() {
 
-  it('is an object', function() {
-    expect(bus).to.be.an('object');
+  var bus;
+  beforeEach(function() {
+    bus = new Bus();
   });
 
   it('has a cellBuffer property', function() {
-    expect(bus.cellBuffer).to.be.an('object');
+    expect(bus.cellBuffer).to.be.an('array');
   });
+
+  describe('#on', function() {
+    it('should register an event', function() {
+
+      var fn = function() { return 1; };
+      bus.on('tako', fn);
+
+      expect(bus.getEvents('tako')).to.include(fn);
+    });
+  });
+
+  describe('#emit', function() {
+    it('should emit event and pass data', function() {
+      var sharks = 0;
+      bus.on('some-event', function(data) {
+        sharks = data;
+      });
+      bus.emit('some-event', 1);
+      expect(sharks).to.equal(1);
+    });
+  });
+
 });

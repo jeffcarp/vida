@@ -1,6 +1,18 @@
-var runner = require("./runner");
-var render = require("./render");
 var React = require('react');
+
+var toggleStartStop;
+
+var controls = module.exports = function(bus, id) {
+
+  toggleStartStop = function() {
+    bus.emit('request game start');
+  };
+
+  React.renderComponent(
+    Left({bus: bus}),
+    document.getElementById(id)
+  );
+};
 
 var StartStop = React.createClass({displayName: 'StartStop',
   render: function() {
@@ -34,13 +46,13 @@ var Left = React.createClass({displayName: 'Left',
   },
   componentDidMount: function() {
     var self = this;
-    runner.on("game start", function() {
+    this.props.bus.on("game start", function() {
       self.setState({gameRunning: true});
     });
-    runner.on("game stop", function() {
+    this.props.bus.on("game stop", function() {
       self.setState({gameRunning: false});
     });
-    runner.on("end tick", function(data) {
+    this.props.bus.on("end tick", function(data) {
       self.updatePopulation(data);
       if (!self.state.gameRunning) self.setState({gameRunning: true});
     });
@@ -48,7 +60,7 @@ var Left = React.createClass({displayName: 'Left',
     window.addEventListener("keydown", function(e) {
       var letter = String.fromCharCode(e.keyCode);
       if (letter == "S") {
-        runner.toggleStartStop();
+        toggleStartStop();
       }
     });
   },
@@ -56,13 +68,13 @@ var Left = React.createClass({displayName: 'Left',
     direction === "out" ? render.zoomOut() : render.zoomIn();
   },
   introduceProtoai: function() {
-    runner.introduce("protoai");
+    this.props.bus.introduce("protoai");
   },
   introduceRando: function() {
-    runner.introduce("rando");
+    this.props.bus.introduce("rando");
   },
   introduceFood: function() {
-    runner.introduce("food");
+    this.props.bus.introduce("food");
   },
   render: function() {
     var ratio = (this.state.totalEnergy / this.state.population).toFixed(2);
@@ -84,7 +96,7 @@ var Left = React.createClass({displayName: 'Left',
             onClick: this.setZoom.bind(null, "in")
             }, "Zoom In"),
           StartStop({
-            action: runner.toggleStartStop,
+            action: toggleStartStop,
             running: this.state.gameRunning}
             )
         ),
@@ -117,8 +129,3 @@ var Left = React.createClass({displayName: 'Left',
     );
   }
 });
-
-React.renderComponent(
-  Left(null),
-  document.getElementById('controls')
-);

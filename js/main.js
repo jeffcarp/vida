@@ -2,18 +2,28 @@ var grid = document.getElementById('grid');
 // not working for some reason
 //require('autoscale-canvas')(grid);
 
-var bus = require('./bus');
+var Bus = require('./bus');
 var Renderer = require('./renderer');
 var Game = require('./game');
+var Map = require('./map');
 
-var gameParams = {
-  speed: 2e3
-};
+var bus = new Bus();
 
-var renderer = new Renderer(grid);
-var game = new Game();
+var map = new Map({
+  width: 10,
+  height: 10
+});
+
+var renderer = new Renderer(grid, bus);
+
+var game = new Game({
+  bus: bus,
+  map: map,
+  initialSpeed: 2e3
+});
 
 renderer.draw();
 
 //var runner = (require("./runner")).init(config);
-require("./controls");
+var controls = require("./controls");
+controls(bus, 'controls');
