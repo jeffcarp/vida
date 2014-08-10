@@ -4,7 +4,7 @@
   "description": "Vida is a game for building and playing with emergent Artificial Intelligence in JavaScript. It takes inspiration from the game [Go](http://en.wikipedia.org/wiki/Go_%28game%29) and [Conway's Game of Life](http://en.wikipedia.org/wiki/Conway's_Game_of_Life).",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha spec"
   },
   "repository": {
     "type": "git",
