@@ -3,13 +3,6 @@ var Bus = module.exports = function() {
 
 var events = {};
 
-Bus.prototype.cellBuffer = [
-  {x: 10, y: 20, hue: 200},
-  {x: 40, y: 50, hue: 100},
-  {x: -60, y: 10, hue: 50},
-  {x: 30, y: -70, hue: 175}
-];
-
 Bus.prototype.on = function(key, fn) {
   events[key] = events[key] || [];
   events[key].push(fn);

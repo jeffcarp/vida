@@ -1,6 +1,5 @@
 var grid = document.getElementById('grid');
-// not working for some reason
-//require('autoscale-canvas')(grid);
+require('./util/requestanimframe');
 
 var Bus = require('./bus');
 var Renderer = require('./renderer');
@@ -27,3 +26,5 @@ renderer.draw();
 //var runner = (require("./runner")).init(config);
 var controls = require("./controls");
 controls(bus, 'controls');
+
+

@@ -6,6 +6,12 @@ var Renderer = module.exports = function(canvasElem, bus) {
   this.context = canvasElem.getContext('2d');
   this.originX = 500;
   this.originY = 200;
+  this.cells = [];
+
+  this.bus.on('end tick', function(data) {
+    this.cells = data.cells
+    window.requestAnimFrame(this.draw.bind(this));
+  }.bind(this));
 };
 
 Renderer.prototype.markOrigin = function() {
@@ -31,10 +37,9 @@ Renderer.prototype.draw = function() {
 
   this.markOrigin();
 
-  var cells = this.bus.cellBuffer;
-
-  cells.forEach(function(cell) {
-    this.context.fillStyle = "hsl("+cell.hue+", 50%, "+50+"%)";
+  this.cells.forEach(function(cell) {
+    var hue = cell.hue || 250;
+    this.context.fillStyle = "hsl("+hue+", 50%, "+50+"%)";
 
     var x = cell.x + this.originX;
     var y = cell.y + this.originY;

@@ -8,10 +8,6 @@ describe('Bus', function() {
     bus = new Bus();
   });
 
-  it('has a cellBuffer property', function() {
-    expect(bus.cellBuffer).to.be.an('array');
-  });
-
   describe('#on', function() {
     it('should register an event', function() {
 

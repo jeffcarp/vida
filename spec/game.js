@@ -8,7 +8,12 @@ describe('Game', function() {
   var lastEmittedData;
   beforeEach(function() {
     game = new Game({
-      map: {},
+      map: {
+        place: function() {},
+        activeCells: function() {
+          return [];
+        }
+      },
       bus: {
         on: function() {},
         emit: function(key, data) {
@@ -61,10 +66,16 @@ describe('Game', function() {
     });
   });
 
-  describe('#getGameData', function() {
-    it('returns a starter object initially', function() {
-      var gd = game.getGameData();
-      expect(gd).to.be.an('object');
+  describe('#tickAllCells', function() {
+
+    it('should increase the age by one', function() {
+      game.tickAllCells();
+      expect(game.age).to.equal(1);
+    });
+
+    it('should emit "end tick when done"', function() {
+      game.tickAllCells();
+      expect(lastEmittedKey).to.equal('end tick');
     });
   });
 
