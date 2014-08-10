@@ -39,9 +39,7 @@ runner.toggleStartStop = function() {
 
 runner.start = function() {
   runner.emit("game start");
-  _interval = window.setInterval(function() {
-    runner.tickAllCells();
-  }, config.speed);
+  _interval = window.setInterval(runner.tickAllCells, config.speed);
 };
 
 runner.stop = function() {
@@ -233,9 +231,8 @@ runner.tickAllCells = function() {
   };
 
   // Compute averate tick time
-  var totalTime = tickTimes.reduce(function(acc, cur) {
-    return acc + cur;
-  }, 0);
+  var sum = function(a, b) { return a + b; };
+  var totalTime = tickTimes.reduce(sum, 0);
   var averageTime = totalTime / (game.cells.length || 1);
   var times = {
     average: averageTime,
