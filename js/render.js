@@ -6,11 +6,12 @@
 
 */
 
+var runner = require('./runner');
+
 var render = {};
 
 var canvas;
 var ctx;
-var setup = false;
 render.offsetX = 0;
 render.offsetY = 0;
 render.zoom = 2;
@@ -30,7 +31,6 @@ render.setZoom = function(zoom) {
   // TODO: This still zooms in around the origin
   render.offsetX = (render.offsetX / prevZoom) * render.zoom;
   render.offsetY = (render.offsetY / prevZoom) * render.zoom;
-  render.resetCanvasAspect();
 };
 
 render.centerCells = function() {
@@ -39,8 +39,6 @@ render.centerCells = function() {
 };
 
 render.init = function(config) {
-
-  setup = true;
 
   var gridID = "grid";
   var blockSize = config.blockSize;
@@ -56,13 +54,6 @@ render.init = function(config) {
   else {
     alert("Please switch to a browser that supports canvas.");
   }
-
-  render.resetCanvasAspect();
-
-      // Keep canvas's aspect ratio the same
-  window.onresize = function(e) {
-    render.resetCanvasAspect();
-  };
 
   var enteredX = null;
   var enteredY = null;
@@ -102,12 +93,17 @@ render.init = function(config) {
   });
 
   window.requestAnimFrame = (function(){
+    return function(callback) {
+             window.setTimeout(callback, 2000);
+           };
+    /*
     return window.requestAnimationFrame       ||
            window.webkitRequestAnimationFrame ||
            window.mozRequestAnimationFrame    ||
            function(callback) {
              window.setTimeout(callback, 1000 / 60);
            };
+           */
   })();
 
 
@@ -121,14 +117,10 @@ render.init = function(config) {
 
 };
 
-render.resetCanvasAspect = function() {
-  canvas.width = window.innerWidth*render.zoom;
-  canvas.height = window.innerHeight*render.zoom;
-};
-
 render.cachedCells;
 render.cachedBlockSize;
 
+/*
 render.setVars = function(game, config) {
   game = game || {};
   config = config || {};
@@ -139,11 +131,10 @@ render.setVars = function(game, config) {
   render.cachedCells = cells;
   render.cachedBlockSize = blockSize;
 };
+*/
 
 // Takes a game state from runner.js and draws that on a canvas
 render.draw = function(game, config) {
-
-  if (!setup) render.init(config);
 
   game = game || {};
   config = config || {};

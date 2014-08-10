@@ -14,8 +14,35 @@
   </div>
 
   <canvas id="grid"></canvas>
+  <script>
+    var canvas = document.getElementById('grid');
+    var context = canvas.getContext('2d');
 
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    var devicePixelRatio = window.devicePixelRatio || 1;
+    var backingStoreRatio = context.webkitBackingStorePixelRatio ||
+    context.mozBackingStorePixelRatio ||
+    context.msBackingStorePixelRatio ||
+    context.oBackingStorePixelRatio ||
+    context.backingStorePixelRatio || 1;
+
+    var ratio = devicePixelRatio / backingStoreRatio;
+    if (devicePixelRatio !== backingStoreRatio) {
+
+      var oldWidth = canvas.width;
+      var oldHeight = canvas.height;
+
+      canvas.width = oldWidth * ratio;
+      canvas.height = oldHeight * ratio;
+
+      canvas.style.width = oldWidth + 'px';
+      canvas.style.height = oldHeight + 'px';
+
+      context.scale(ratio, ratio);
+    }
+  </script>
   <script src="public/main.js"></script>
-
 </body>
 </html>

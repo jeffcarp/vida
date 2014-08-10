@@ -1,15 +1,19 @@
 var grid = document.getElementById('grid');
+// not working for some reason
 //require('autoscale-canvas')(grid);
 
-var mapSize = grid.width;
-var blockSize = 4;
+var bus = require('./bus');
+var Renderer = require('./renderer');
+var Game = require('./game');
 
-// Game params
-var config = {
-  mapSize: mapSize/blockSize,
-  blockSize: blockSize,
-  speed: 200
+var gameParams = {
+  speed: 2e3
 };
 
-var runner = (require("./runner")).init(config);
+var renderer = new Renderer(grid);
+var game = new Game();
+
+renderer.draw();
+
+//var runner = (require("./runner")).init(config);
 require("./controls");

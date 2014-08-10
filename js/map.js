@@ -74,3 +74,9 @@ Map.prototype.move = function(from, to) {
   this.place(cell, toX, toY);
   return true;
 };
+
+Map.prototype.activeCells = function() {
+  return Object.keys(this.cells).map(function(key) {
+    return this.cells[key];
+  }.bind(this));
+};

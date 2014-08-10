@@ -2,9 +2,10 @@
 var runner = {};
 
 // Dependencies
-var render = require("./render");
+//var render = require("./render");
 var aux = require("./helpers");
 var cellutil = require("./cells/util");
+var Map = require("./map");
 
 var ais = {
   "protoai": require("./cells/protoai"),
@@ -19,14 +20,21 @@ var game = {
 var config = {};
 var _interval;
 var _baseID = 0;
+var map;
 
 runner.init = function(userConfig) {
   config = runner.defaultConfig(userConfig);
 
+  map = new Map({
+    width: 100,
+    height: 100
+  });
+  runner.map = 'ok';
+
   // Hack to wait for DOM to load
   window.onload = function() {
-    render.setVars(game, config);
-    render.init(config);
+    //render.setVars(game, config);
+    //render.init(config);
   };
 
   //runner.introduce();
@@ -72,7 +80,8 @@ runner.createCell = function(options) {
     type: options.type || "cell",
     color: color
   };
-  game.cells.push(cell);
+  map.place(cell, cell.x, cell.y);
+//  game.cells.push(cell);
   _baseID += 1;
   return cell;
 };
@@ -127,7 +136,7 @@ var shuffleArray = function(array) {
 }
 
 var cellsOfAi = function(ai) {
-  return game.cells.filter(function(c) {
+  return map.activeCells().filter(function(c) {
     return c && c.ai === ai;
   });
 };
@@ -144,17 +153,21 @@ runner.tickAllCells = function() {
   */
 
   // Randomize order of array to make eating fair
-  game.cells = shuffleArray(game.cells);
+  // TODO: Reevaluate the need for this
+  //game.cells = shuffleArray(game.cells);
   // - I actually don't think this is necessary
 
   game.time += 1;
 
   var tickTimes = [];
 
+
+  var activeCells = map.activeCells();
   // For each cell
-  for (var cellIndex in game.cells) {
+  for (var cellIndex in activeCells) {
+    if (!activeCells.hasOwnProperty(cellIndex)) continue;
     var startTime = new Date();
-    var cell = game.cells[cellIndex];
+    var cell = activeCells[cellIndex];
 
     // TODO: See if there are any messages
     cell.age += 1;
@@ -167,7 +180,8 @@ runner.tickAllCells = function() {
 
     // Cells die by running out of energy
     if (cell.energy <= 0) {
-      game.cells = runner.removeCell(cell);
+      map.removeById(cell.id);
+      //game.cells = runner.removeCell(cell);
       continue;
     }
 
@@ -183,7 +197,8 @@ runner.tickAllCells = function() {
         var dist = Math.abs(target.x - cell.x) + Math.abs(target.y - cell.y);
         if (dist < 5) {
           cell.energy += target.energy;
-          game.cells = runner.removeCell(target);
+          map.removeById(target.id);
+          //game.cells = runner.removeCell(target);
           continue;
         }
       }
@@ -247,14 +262,16 @@ runner.tickAllCells = function() {
     throw new Error(msg);
   }
 
-  render.setVars(game, config);
+  //render.setVars(game, config);
 
+  /*
   runner.emit("end tick", {
     population: game.cells.length,
     totalEnergy: runner.totalEnergy(game.cells),
     averageAge: runner.averageAge(game.cells),
     times: times
   });
+  */
 };
 
 runner.totalEnergy = function(cells) {
@@ -288,7 +305,7 @@ runner.neighborhoodFor = function(cell, size, cells) {
 };
 
 runner.population = function() {
-  return game.cells.length;
+  return map.activeCells().length;
 };
 
 var _callbacks = {};
@@ -313,21 +330,18 @@ runner.move = function(cell, x, y) {
   cell.y = y;
 };
 
+/*
 runner.removeCell = function(cell) {
-  var i = game.cells.indexOf(cell);
-  if (i != -1) game.cells.splice(i, 1);
-  return game.cells;
+  map.removeById(cell.id);
 };
+*/
 
 runner.cellExists = function(x, y) {
   return Boolean(runner.cellAt(x, y));
 };
 
 runner.cellAt = function(x, y) {
-  //return render.interestingCellExists(x, y); welp, that wasn't faster
-  return game.cells.reduce(function(acc, cur) {
-    return (cur.x === x && cur.y === y) ? cur : acc;
-  }, null);
+  return map.at(x, y);
 };
 
 runner.vacant = function(x, y) {

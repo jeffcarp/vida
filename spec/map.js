@@ -104,4 +104,20 @@ describe('Map', function() {
       expect(Object.keys(map.graph).length).to.equal(0);
     });
   });
+
+  describe('#activeCells', function() {
+    it('returns an empty array if no cells', function() {
+      expect(map.activeCells()).to.be.an('array');
+      expect(map.activeCells()).to.be.empty;
+    });
+
+    it('returns true if removal is successful', function() {
+      map.place({id: 5}, 5, 5);
+      map.place({id: 6}, 5, 6);
+      map.place({id: 7}, 5, 7);
+      var cells = map.activeCells();
+      expect(cells.length).to.equal(3);
+    });
+  });
+
 });
