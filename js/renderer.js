@@ -7,6 +7,7 @@ var Renderer = module.exports = function(canvasElem, bus) {
   this.originX = 500;
   this.originY = 200;
   this.cells = [];
+  this.blockSize = 3;
 
   this.bus.on('end tick', function(data) {
     this.cells = data.cells
@@ -41,10 +42,10 @@ Renderer.prototype.draw = function() {
     var hue = cell.hue || 250;
     this.context.fillStyle = "hsl("+hue+", 50%, "+50+"%)";
 
-    var x = cell.x + this.originX;
-    var y = cell.y + this.originY;
-    var blockSize = 10;
+    var size = this.blockSize;
+    var x = cell.x * size + this.originX;
+    var y = cell.y * size + this.originY;
 
-    this.context.fillRect(x, y, blockSize, blockSize);
+    this.context.fillRect(x, y, size, size);
   }.bind(this));
 };

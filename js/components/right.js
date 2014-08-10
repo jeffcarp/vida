@@ -22,7 +22,7 @@ var Right = module.exports = React.createClass({
     return d.div({id: 'right'},
       d.h1(null, 'Population'),
       d.p({className: "mfb"},
-          "Population: ",
+          "Total: ",
           null, this.state.population,
           " cells"),
       d.p({className: "mfb"},

@@ -82,16 +82,12 @@ var Left = React.createClass({
     return (
       React.DOM.div({id: this.props.xid},
         React.DOM.div({className: "mfb"},
-          React.DOM.div({className: "mfb"}, React.DOM.h1(null, "Welcome to Vida!")),
-          React.DOM.p({className: "mfb"}, "Vida is a platform for building and playing with cell AIs written in JavaScript.")
-        ),
+          React.DOM.p({className: "mfb"}, "Vida is a platform for building and playing with cell AIs written in JavaScript.")),
 
         React.DOM.div({className: "mfb"},
           StartStop({
             action: toggleStartStop,
-            running: this.state.gameRunning}
-            )
-        ),
+            running: this.state.gameRunning})),
 
 
         React.DOM.h2({className: "mfb"}, "Introduce AIs"),

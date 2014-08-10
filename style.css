@@ -49,6 +49,9 @@ p {
 #left h1,
 #right h1 {
   font-size: 1.2em;
+  border-bottom: solid 1px rgba(0, 0, 0, 0.3);
+  margin-bottom: 0.4em;
+  padding-bottom: 0.4em;
 }
 
 #right {

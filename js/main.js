@@ -27,4 +27,4 @@ renderer.draw();
 var controls = require("./controls");
 controls(bus, 'controls');
 
-
+game.start();
