@@ -221,13 +221,6 @@ runner.tickAllCells = function() {
       var desiredX = cell.x + move[0];
       var desiredY = cell.y + move[1];
 
-      // TEMP
-      var graphExists = runner.cellExists(desiredX, desiredY);
-      var canvasExists = render.interestingCellExists(desiredX, desiredY);
-      if (graphExists !== canvasExists) {
-        alert('inconsistency between graph and canvas data fetching');
-      }
-
       // TODO: If valid
       if (!runner.cellExists(desiredX, desiredY)) {
         runner.move(cell, desiredX, desiredY);

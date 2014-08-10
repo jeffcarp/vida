@@ -184,19 +184,4 @@ render.draw = function(game, config) {
 
 };
 
-render.getDataAt = function(x, y) {
-  var blockSize = render.cachedBlockSize || 2;
-
-  var dataX = (x*blockSize)+render.offsetX;
-  var dataY = (y*blockSize)+render.offsetY;
-  return ctx.getImageData(dataX, dataY, 1, 1).data;
-};
-
-render.interestingCellExists = function(x, y) {
-  var colorData = render.getDataAt(x, y);
-  return colorData[0] > 0
-      && colorData[1] > 0
-      && colorData[2] > 0;
-};
-
 module.exports = render;
