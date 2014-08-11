@@ -7,7 +7,7 @@ var Renderer = module.exports = function(canvasElem, bus) {
   this.originX = window.innerWidth/2;
   this.originY = window.innerHeight/2;
   this.cells = [];
-  this.blockSize = 2;
+  this.blockSize = 3;
 
   this.bus.on('end tick', function(data) {
     this.cells = data.cells

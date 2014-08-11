@@ -17,12 +17,14 @@ var Game = module.exports = function(options) {
   }
 
   // TRYING OUT
-  for (var i=0; i<800; i++) {
+  for (var i=0; i<20; i++) {
+    var ai = i % 2 === 0 ? 'rando' : 'tiger';
     var res = this.map.place({
       x: aux.randOrigin(40),
       y: aux.randOrigin(40),
       hue: aux.rand(256),
-      id: i
+      id: i,
+      ai: ai
     });
   }
 };
@@ -52,7 +54,7 @@ Game.prototype.tickAllCells = function() {
   var startTime = new Date();
 
   this.map.activeCells().forEach(function(cell) {
-    var move = aiLibrary['rando'].tick();
+    var move = aiLibrary[cell.ai].tick();
     var x = cell.x;
     var y = cell.y;
     var res = this.map.move([x, y], [x + move.x, y + move.y]);
