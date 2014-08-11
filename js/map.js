@@ -10,7 +10,9 @@ var Map = module.exports = function(options) {
 };
 
 Map.prototype.at = function(x, y) {
-  if (this.graph[x] && this.graph[x][y]) {
+  if (this.graph[x] !== undefined
+      && this.graph[x][y] !== undefined) {
+    // Graph only stores IDs
     return this.cells[this.graph[x][y]];
   }
   else {
@@ -23,13 +25,29 @@ Map.prototype.idAt = function(x, y) {
 };
 
 Map.prototype.place = function(cell, x, y) {
+  if (!x) {
+    if (!cell.x) {
+      return false;
+    }
+    else {
+      var x = cell.x;
+    }
+  }
+  if (!y) {
+    if (!cell.y) {
+      return false;
+    }
+    else {
+      var y = cell.y;
+    }
+  }
   if (x > this.width || x < -this.width) {
     return false;
   }
   if (y > this.height || y < -this.height) {
     return false;
   }
-  if (cell.id && this.vacant(x, y)) {
+  if (!isNaN(cell.id) && this.vacant(x, y)) {
     cell.x = x;
     cell.y = y;
     this.graph[x] = this.graph[x] || {};
@@ -70,16 +88,16 @@ Map.prototype.move = function(from, to) {
   var toX = to[0];
   var toY = to[1];
   if (toX > this.width || toX < -this.width) {
-    return false;
+    return 'X out of bounds';
   }
   if (toY > this.height || toY < -this.height) {
-    return false;
+    return 'Y out of bounds';
   }
   if (this.vacant(fromX, fromY)) {
-    return false;
+    return 'No cell at from coords';
   }
   if (!this.vacant(toX, toY)) {
-    return false;
+    return 'To coords occupied';
   }
   var cell = this.at(fromX, fromY);
   this.removeById(cell.id);

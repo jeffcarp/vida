@@ -9,8 +9,8 @@ var Map = require('./map');
 var bus = new Bus();
 
 var map = new Map({
-  width: 10,
-  height: 10
+  width: 60,
+  height: 60
 });
 
 var renderer = new Renderer(grid, bus);
@@ -18,7 +18,7 @@ var renderer = new Renderer(grid, bus);
 var game = new Game({
   bus: bus,
   map: map,
-  initialSpeed: 500
+  initialSpeed: 80
 });
 
 renderer.draw();

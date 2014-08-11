@@ -1,4 +1,5 @@
-var rando = require('./cells/rando');
+var aiLibrary = require('./cells/library');
+var aux = require('./helpers');
 
 var Game = module.exports = function(options) {
 
@@ -8,10 +9,6 @@ var Game = module.exports = function(options) {
   this.map = options.map;
   this.speed = options.initialSpeed || 2e3;
 
-  this.ais = {
-    'rando': rando
-  };
-
   this.running = false;
   this.age = 0;
 
@@ -19,23 +16,15 @@ var Game = module.exports = function(options) {
     this.bus.on('request game start', this.toggle.bind(this));
   }
 
-  // TRY
-  var cell = {
-    x: 20,
-    y: -5,
-    id: 1,
-    hue: 200
-  };
-
-  this.map.place(cell, cell.x, cell.y);
-  var cell = {
-    x: -10,
-    y: 0,
-    id: 2,
-    hue: 100
-  };
-
-  this.map.place(cell, cell.x, cell.y);
+  // TRYING OUT
+  for (var i=0; i<800; i++) {
+    var res = this.map.place({
+      x: aux.randOrigin(40),
+      y: aux.randOrigin(40),
+      hue: aux.rand(256),
+      id: i
+    });
+  }
 };
 
 var gameData = {};
@@ -63,10 +52,10 @@ Game.prototype.tickAllCells = function() {
   var startTime = new Date();
 
   this.map.activeCells().forEach(function(cell) {
-    var move = this.ais['rando'].tick();
+    var move = aiLibrary['rando'].tick();
     var x = cell.x;
     var y = cell.y;
-    this.map.move([x, y], [x + move.x, y + move.y]);
+    var res = this.map.move([x, y], [x + move.x, y + move.y]);
   }.bind(this));
 
   var endTime = new Date();
@@ -76,6 +65,7 @@ Game.prototype.tickAllCells = function() {
     population: this.map.activeCells().length,
     totalEnergy: 2,
     averageAge: 2,
+    age: this.age,
     totalTime: totalTime,
     cells: this.map.activeCells()
   });

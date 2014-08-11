@@ -4,10 +4,10 @@ var Renderer = module.exports = function(canvasElem, bus) {
   this.bus = bus;
   this.canvas = canvasElem;
   this.context = canvasElem.getContext('2d');
-  this.originX = 500;
-  this.originY = 200;
+  this.originX = window.innerWidth/2;
+  this.originY = window.innerHeight/2;
   this.cells = [];
-  this.blockSize = 8;
+  this.blockSize = 2;
 
   this.bus.on('end tick', function(data) {
     this.cells = data.cells

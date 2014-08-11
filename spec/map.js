@@ -23,6 +23,12 @@ describe('Map', function() {
       expect(map.at(5, 5)).to.be.null;
     });
 
+    it('works for cells with id 0', function() {
+      var cell = {id: 0};
+      map.place(cell, 5, 5);
+      expect(map.at(5, 5)).to.equal(cell);
+    });
+
     it('returns a cell if it is there', function() {
       var cell = {id: 9};
       map.place(cell, 5, 5);
@@ -56,6 +62,13 @@ describe('Map', function() {
       expect(Object.keys(map.cells).length).to.equal(1);
     });
 
+    it('accepts just a cell if it has x: and y:', function() {
+      var res = map.place({id: 8, x: 10, y: -10});
+      expect(res).to.be.true;
+      expect(Object.keys(map.cells).length).to.equal(1);
+      expect(map.vacant(10, -10)).to.be.false;
+    });
+
     it('should return false if spot is occupied and not store it', function() {
       map.place({id: 8}, 5, 5);
       expect(map.place({id: 9}, 5, 5)).to.be.false;
@@ -76,30 +89,30 @@ describe('Map', function() {
 
   describe('#move', function() {
 
-    it('returns false if no cell available', function() {
+    it('returns error string if no cell available', function() {
       map.place({id: 9}, 5, 5);
-      expect(map.move([5, 6], [5, 7])).to.be.false;
+      expect(map.move([5, 6], [5, 7])).to.be.a('string');
     });
 
-    it('returns false if spot is occupied', function() {
+    it('returns error string if spot is occupied', function() {
       map.place({id: 7}, 5, 5);
       map.place({id: 9}, 5, 6);
-      expect(map.move([5, 6], [5, 5])).to.be.false;
+      expect(map.move([5, 6], [5, 5])).to.be.a('string');
     });
 
-    it('returns false if out of bounds (x)', function() {
+    it('returns error string if out of bounds (x)', function() {
       map.place({id: 7}, 99, 5);
-      expect(map.move([99, 5], [100, 5])).to.be.false;
+      expect(map.move([99, 5], [100, 5])).to.be.a('string');
       map.place({id: 8}, -99, 5);
-      expect(map.move([-99, 5], [-100, 5])).to.be.false;
+      expect(map.move([-99, 5], [-100, 5])).to.be.a('string');
     });
 
-    it('returns false if out of bounds (y)', function() {
+    it('returns error string if out of bounds (y)', function() {
       map.place({id: 7}, 5, 99);
-      expect(map.move([5, 99], [5, 100])).to.be.false;
+      expect(map.move([5, 99], [5, 100])).to.be.a('string');
       expect(map.vacant(5, 99)).to.be.false;
       map.place({id: 8}, 5, -99);
-      expect(map.move([5, -99], [5, -100])).to.be.false;
+      expect(map.move([5, -99], [5, -100])).to.be.a('string');
       expect(map.vacant(5, -99)).to.be.false;
     });
 
