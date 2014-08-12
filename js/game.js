@@ -16,13 +16,18 @@ var Game = module.exports = function(options) {
     this.bus.on('request game start', this.toggle.bind(this));
   }
 
+  var aiColors = {};
+  Object.keys(aiLibrary).forEach(function(aiKey) {
+    aiColors[aiKey] = aux.rand(256);
+  });
+
   // TRYING OUT
-  for (var i=0; i<20; i++) {
+  for (var i=0; i<400; i++) {
     var ai = i % 2 === 0 ? 'rando' : 'tiger';
     var res = this.map.place({
-      x: aux.randOrigin(40),
-      y: aux.randOrigin(40),
-      hue: aux.rand(256),
+      x: aux.randOrigin(60),
+      y: aux.randOrigin(60),
+      hue: aiColors[ai],
       id: i,
       ai: ai
     });
@@ -54,7 +59,11 @@ Game.prototype.tickAllCells = function() {
   var startTime = new Date();
 
   this.map.activeCells().forEach(function(cell) {
-    var move = aiLibrary[cell.ai].tick();
+    var world = {
+      age: this.age,
+      map: this.map // should give ais an immutable version
+    };
+    var move = aiLibrary[cell.ai].tick(cell, world);
     var x = cell.x;
     var y = cell.y;
     var res = this.map.move([x, y], [x + move.x, y + move.y]);
@@ -73,4 +82,11 @@ Game.prototype.tickAllCells = function() {
   });
 
   this.age += 1;
+
+  if (totalTime > this.speed) {
+    this.stop();
+    console.log('Sorry, tick took too long. ('+totalTime+'). Slowing down.');
+    this.speed = this.speed * 1.5;
+    this.start();
+  }
 };
