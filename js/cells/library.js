@@ -1,3 +1,4 @@
 var library = module.exports = {
-  rando: require('./rando')
+  rando: require('./rando'),
+  tiger: require('./tiger')
 };

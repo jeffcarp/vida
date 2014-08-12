@@ -2,7 +2,7 @@ var protoai = {};
 
 var cellutil = require("./util");
 
-protoai.tick = function(cell, neighborhood, messages, time) {
+protoai.tick = function(cell, world) {
   var randDir = cellutil.randDir();
   return {
     x: randDir[0],

@@ -77,6 +77,8 @@ describe('Game', function() {
       game.tickAllCells();
       expect(lastEmittedKey).to.equal('end tick');
     });
+
+    it('should pass the cell to the ai tick function');
   });
 
 });

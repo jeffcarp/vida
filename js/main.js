@@ -18,12 +18,11 @@ var renderer = new Renderer(grid, bus);
 var game = new Game({
   bus: bus,
   map: map,
-  initialSpeed: 80
+  initialSpeed: 100
 });
 
 renderer.draw();
 
-//var runner = (require("./runner")).init(config);
 var controls = require("./controls");
 controls(bus, 'controls');
 
